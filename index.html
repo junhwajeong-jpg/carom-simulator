@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Jun's Carom">
 <meta name="theme-color" content="#101916">
 <meta name="format-detection" content="telephone=no">
+<meta name="app-build" content="6d6bc06f">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -91,10 +92,16 @@ padding:var(--st) var(--sr) var(--sb) var(--sl);background:var(--bg)}
 .armbar{position:absolute;top:6px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:#1b1508e6;border:1px solid #f2b84b;border-radius:22px;padding:4px 4px 4px 12px;font-size:11px;color:#f6d99a;white-space:nowrap;z-index:3}
 .armbar button{height:32px;padding:0 14px;border-radius:16px;background:#3a2c12;border-color:#8a6a2a;color:#f6d99a;font-size:12px}
 .armbar button.hot{background:#b3402e;border-color:#e2705c;color:#fff}
+.armbar.upd{border-color:var(--lime);color:var(--lime);background:#101e16e6}
+.armbar.upd button{background:var(--lime);border-color:var(--lime);color:#1a3019;font-weight:700}
 .toast{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);background:#0d1512e6;border:1px solid var(--line);border-radius:18px;padding:5px 12px;font-size:11px;color:var(--lime);pointer-events:none;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis;transition:opacity .25s;z-index:2}
 .toast.off{opacity:0}
 #loupe{position:absolute;top:8px;width:124px;height:124px;border-radius:50%;overflow:hidden;border:2px solid #dfe8c4;box-shadow:0 4px 16px #0009;pointer-events:none;background:#141f19;z-index:2}
 #loupe.L{left:8px}#loupe.R{right:8px}
+#loupe.big{border-width:3px}
+#loupe.big::before,#loupe.big::after{content:"";position:absolute;background:#f3f6c9;opacity:.35;z-index:1}
+#loupe.big::before{left:50%;top:0;bottom:0;width:1px}#loupe.big::after{top:50%;left:0;right:0;height:1px}
+#loupe.big b{bottom:15%;font-size:12px;line-height:1.3;font-weight:600;font-variant-numeric:tabular-nums;white-space:pre-line}
 #loupe svg{width:100%;height:100%;display:block}
 /* custom properties inherit into <use>, so names are hidden only inside the magnifier */
 #loupeSvg{--label-opacity:0}
@@ -148,6 +155,31 @@ padding:var(--st) var(--sr) var(--sb) var(--sl);background:var(--bg)}
 .keys button{height:46px;font-size:17px}
 .keys .ok{background:var(--lime);color:#1a3019;border-color:var(--lime);font-weight:700;font-size:14px}
 .keys .sub{font-size:12px}
+.goal{position:absolute;left:8px;bottom:8px;max-width:58%;background:#0d1512e6;border:1px solid #57704b;border-radius:10px;padding:5px 9px;font-size:10.5px;line-height:1.4;color:#dfe8c4;pointer-events:none;z-index:2}
+.goal b{color:var(--lime)}
+.stage.in-mission .toast{left:auto;right:8px;transform:none;max-width:40%;white-space:normal;border-radius:10px;line-height:1.4}
+.armbar.res{max-width:96%;white-space:normal;flex-wrap:wrap;justify-content:center;border-color:#57704b;color:var(--text);background:#0d1512f2;padding:5px 6px 5px 12px;gap:6px}
+.armbar.res.win{border-color:var(--lime)}.armbar.res.win span{color:var(--lime);font-weight:600}
+.armbar.res.lose span{color:#f3b3a6}
+.armbar.res button{background:#24342c;border-color:#425448;color:var(--text)}
+.armbar.res button.main{background:var(--lime);border-color:var(--lime);color:#1a3019;font-weight:700}
+.tiles{display:flex;flex-wrap:wrap;gap:7px}
+.tile{width:70px;height:50px;display:grid;place-items:center;align-content:center;line-height:1.15;font-size:13px;background:#1c2922}
+.tile small{display:block;font-size:11px;color:#6f8576;letter-spacing:1px}
+.tile.done{border-color:#7fa35a;background:#26382a}.tile.done small{color:#f2c94c}
+.tile.now{outline:2px solid var(--lime);outline-offset:1px}
+.msum{font-size:12px;color:#cad9c8;margin-bottom:10px;line-height:1.55}
+.msum button{margin-left:8px}
+.guidebox{width:min(780px,100%);max-height:100%;background:var(--panel);border:1px solid #57704b;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.guidebox h2{margin:0;font-size:16px}.guidebox h2 small{font-size:11px;font-weight:400;color:var(--muted);margin-left:8px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.steps div{background:#101e16;border:1px solid #2d4232;border-radius:10px;padding:10px}
+.steps b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--lime);color:#1a3019;font-size:12px;margin-right:6px}
+.steps strong{font-size:13px}
+.steps p{margin:6px 0 0;font-size:11.5px;color:var(--muted);line-height:1.5}
+.steps em{font-style:normal;color:var(--lime)}
+.guidebox .ok{align-self:flex-end;height:40px;padding:0 22px;background:var(--lime);border-color:var(--lime);color:#1a3019;font-weight:700}
+#levelBadge{flex:none}
 </style>
 </head>
 <body>
@@ -157,6 +189,7 @@ padding:var(--st) var(--sr) var(--sb) var(--sl);background:var(--bg)}
   <div class="rail-label" id="selTitle">수구 선택</div>
   <div class="picks" id="picks"></div>
   <span class="grow"></span>
+  <button id="missionBtn">🎯 미션</button>
   <button id="undo" disabled>↶ 되돌리기</button>
   <button id="menu">☰ 메뉴</button>
 </nav>
@@ -211,7 +244,10 @@ padding:var(--st) var(--sr) var(--sb) var(--sl);background:var(--bg)}
       </g>
     </svg>
     <div id="armbar" class="armbar" hidden><span id="armText">큐대를 드래그해 미세 조준 · 손을 떼면 발사</span><button id="cancelArm">✕ 취소</button></div>
+    <div id="updbar" class="armbar upd" hidden><span>새 버전이 있습니다</span><button id="applyUpdate">적용</button></div>
     <div id="loupe" class="L" hidden><svg id="loupeSvg" viewBox="0 0 200 200" aria-hidden="true"><use href="#scene"/></svg><b id="loupeLabel">첫 접촉</b></div>
+    <div id="mresult" class="armbar res" hidden><span id="mresultText"></span><button id="mNext" class="main">다음 미션</button><button id="mRetry" class="main">다시 도전</button><button id="mAnswer">정답 보기</button><button id="mList">목록</button></div>
+    <div id="goal" class="goal" hidden></div>
     <div id="toast" class="toast" role="status" aria-live="polite">큐대를 드래그해 조준하세요.</div>
   </div>
 </main>
@@ -227,7 +263,7 @@ padding:var(--st) var(--sr) var(--sb) var(--sl);background:var(--bg)}
 
 <div id="sheet" class="overlay" hidden>
   <div class="sheetbox" role="dialog" aria-label="메뉴">
-    <header><div class="tabs" id="tabs"><button data-tab="result">샷 결과</button><button data-tab="view">표시 · 배치</button><button data-tab="phys">물리 설정</button><button data-tab="info">정보</button></div><button id="sheetClose" aria-label="닫기">✕</button></header>
+    <header><div class="tabs" id="tabs"><button data-tab="result">샷 결과</button><button data-tab="view">표시 · 배치</button><button data-tab="phys">물리 설정</button><button data-tab="info">정보</button><button data-tab="help">사용법</button></div><button id="sheetClose" aria-label="닫기">✕</button></header>
     <div class="sheetbody" id="sheetBody">
       <section data-pane="result">
         <div class="telemetry"><div><span>시뮬레이션 시간</span><strong id="elapsed">0.00 s</strong></div><div><span>수구 속도</span><strong id="liveSpeed">0.00 m/s</strong></div><div><span>공 충돌 / 쿠션</span><strong id="hitCount">0 / 0</strong></div><div><span>수구 이동 거리</span><strong id="travelDistance">0.00 m</strong></div><div class="wide"><span>최근 쿠션 각도 · 법선 기준</span><strong id="reboundAngles">—</strong></div></div>
@@ -251,10 +287,30 @@ padding:var(--st) var(--sr) var(--sb) var(--sl);background:var(--bg)}
           <p id="scaleInfo">비율 계산 중</p>
           <p>물리 모델: 무회전 2차원 강체 근사이며, 회전·밀어치기·끌어치기·쿠션의 스핀 전달은 반영하지 않습니다. 실제 테이블에 맞춰 보정하지 않았으므로 연습용으로 사용하세요. 경기면·공·큐는 같은 축척이며 테두리 디자인은 예시입니다.</p>
           <p>모델 참고: <a href="https://mechanicsmap.psu.edu/websites/11_impulse_momentum_particle/11-3_surface_collisions/surface_collisions.html" target="_blank" rel="noopener noreferrer">Penn State · 쿠션 반발계수</a> · <a href="https://openstax.org/books/college-physics-2e/pages/8-6-collisions-of-point-masses-in-two-dimensions" target="_blank" rel="noopener noreferrer">OpenStax · 2차원 충돌</a> · 규격 참고: <a href="https://kr.object.ncloudstorage.com/kbfdiv/2025_kbf_division_manual.pdf.pdf" target="_blank" rel="noopener noreferrer">대한당구연맹 2025 디비전리그 매뉴얼</a></p>
-          <p>아이폰 설치: Safari에서 열고 공유 버튼 → ‘홈 화면에 추가’. 화면 회전 잠금이 켜져 있어도 가로 화면으로 표시됩니다. <span id="appVersion"></span></p>
+          <p>아이폰 설치: Safari에서 열고 공유 버튼 → ‘홈 화면에 추가’. 화면 회전 잠금이 켜져 있어도 가로 화면으로 표시됩니다.</p>
+          <p id="updateRow"><span id="appVersion"></span> <button id="checkUpdate" class="wide-btn" style="margin-left:8px">업데이트 확인</button></p>
         </div>
       </section>
     </div>
+  </div>
+</div>
+
+<div id="missions" class="overlay" hidden>
+  <div class="sheetbox" role="dialog" aria-label="미션">
+    <header><div class="tabs" id="courseTabs"></div><span id="levelBadge" class="state-tag"></span><button id="missionsClose" aria-label="닫기" style="width:38px;height:34px;font-size:15px">✕</button></header>
+    <div class="sheetbody" id="missionBody"></div>
+  </div>
+</div>
+
+<div id="guide" class="overlay" hidden>
+  <div class="guidebox" role="dialog" aria-label="사용법">
+    <h2>샷 하는 법 <small>메뉴 → 사용법에서 다시 볼 수 있습니다</small></h2>
+    <div class="steps">
+      <div><b>1</b><strong>큐대 방향 잡기</strong><p>테이블 아무 곳이나 <em>드래그</em>하면 큐대가 돌아갑니다. 점선은 수구의 예상 경로입니다. 위쪽 ±버튼으로 0.1°씩 맞출 수 있습니다.</p></div>
+      <div><b>2</b><strong>[샷] 버튼 누르기</strong><p>오른쪽 아래 <em>샷</em> 버튼을 누르면 발사 준비 상태가 됩니다. 세기는 오른쪽 막대에서 정합니다.</p></div>
+      <div><b>3</b><strong>드래그하고 손 떼기</strong><p>테이블을 드래그해 큐대를 미세하게 조정한 뒤 <em>손을 떼면 샷</em>이 됩니다. 조정 없이 치려면 [발사], 그만두려면 [✕ 취소]를 누르세요.</p></div>
+    </div>
+    <button id="guideClose" class="ok">시작하기</button>
   </div>
 </div>
 
@@ -435,10 +491,142 @@ class CaromPhysics {
 globalThis.CaromPhysics = CaromPhysics;
 
 </script>
+<script id="mission-core">/* Mission rules, shared by the generator (Node) and the app.
+   Balls: 0 white (cue), 1 red ①, 2 red ②, 3 yellow (opponent's cue ball).
+   Rails: top/bottom are the long rails (장), left/right the short rails (단). */
+const MissionCore = (() => {
+  const W = 2448, H = 1224, R = 32.75, D = 65.5, YELLOW = 3;
+  const CATS = [
+    { key: 'direct', name: '기본 두께', goal: { pre: [0, 0], mid: [0, 0] } },
+    { key: 'c1', name: '1쿠션 치기', goal: { pre: [0, 0], mid: [1, 1] } },
+    { key: 'c2', name: '2쿠션 치기', goal: { pre: [0, 0], mid: [2, 2] } },
+    { key: 'kiss', name: '걸어치기', goal: { pre: [1, 1], mid: [0, 1] } },
+    { key: 'bank', name: '빈쿠션', goal: { pre: [2, 3], mid: [0, 6] } },
+    { key: 'gather', name: '모아치기', goal: { pre: [0, 0], mid: [0, 2], gather: 420 } },
+    { key: 'gap', name: '구멍치기', goal: { pre: [0, 3], mid: [0, 6], gap: true } },
+    { key: 'back', name: '뒤돌리기', goal: { pre: [0, 0], mid: [3, 6], pattern: ['장', '단', '장'], firstRail: 'near' } },
+    { key: 'front', name: '앞돌리기', goal: { pre: [0, 0], mid: [3, 6], pattern: ['장', '단', '장'], firstRail: 'far' } },
+    { key: 'side', name: '옆돌리기', goal: { pre: [0, 0], mid: [3, 6], pattern: ['단', '장'] } },
+    { key: 'big', name: '대회전', goal: { pre: [0, 0], mid: [4, 7] } },
+    { key: 'cross', name: '횡단', goal: { pre: [0, 0], mid: [3, 6], pattern: ['장', '장', '장'] } }
+  ];
+  const railOf = e => e.axis === 'y' ? (e.side < 0 ? 'top' : 'bottom') : (e.side < 0 ? 'left' : 'right');
+  const kindOf = rail => rail === 'top' || rail === 'bottom' ? '장' : '단';
+  const nearLong = p => p.y < H / 2 ? 'top' : 'bottom';
+  /* The cue ball's own contacts, in order, from the engine's event list. */
+  function timeline(events, cue) {
+    const out = [];
+    for (const e of events) {
+      if (e.type === 'ball') { if (e.i === cue || e.j === cue) out.push({ k: 'ball', b: e.i === cue ? e.j : e.i }); }
+      else if (e.i === cue) out.push({ k: 'rail', rail: railOf(e) });
+    }
+    return out;
+  }
+  /* Route check on a (possibly unfinished) timeline: 'fail', 'scored' or 'open'. */
+  function scan(goal, line, balls) {
+    const s = { status: 'open', why: '', first: -1, pre: 0, mid: 0, rails: [] };
+    const fail = why => { s.status = 'fail'; s.why = why; return s; };
+    for (const ev of line) {
+      if (ev.k === 'ball') {
+        if (ev.b === YELLOW) return fail('yellow');
+        if (s.first < 0) {
+          if (s.pre < goal.pre[0]) return fail('pre');
+          s.first = ev.b;
+        } else if (ev.b !== s.first) {
+          if (s.mid < goal.mid[0]) return fail('mid');
+          if (goal.pattern) for (let i = 0; i < goal.pattern.length; i++) if (kindOf(s.rails[i]) !== goal.pattern[i]) return fail('pattern');
+          if (goal.firstRail) {
+            const near = nearLong(balls[s.first]);
+            if ((goal.firstRail === 'near') !== (s.rails[0] === near)) return fail('firstRail');
+          }
+          s.status = 'scored'; return s;
+        }
+      } else if (s.first < 0) {
+        if (++s.pre > goal.pre[1]) return fail('pre');
+      } else {
+        s.rails.push(ev.rail);
+        if (++s.mid > goal.mid[1]) return fail('mid');
+        if (goal.pattern && s.mid <= goal.pattern.length && kindOf(ev.rail) !== goal.pattern[s.mid - 1]) return fail('pattern');
+        if (goal.firstRail && s.mid === 1 && (goal.firstRail === 'near') !== (ev.rail === nearLong(balls[s.first]))) return fail('firstRail');
+      }
+    }
+    return s;
+  }
+  const cross = (a, b, c, d) => {
+    const o = (p, q, r) => (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
+    return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0;
+  };
+  /* Gap: the two ends of the opening (ball centres, or a ball centre and the point on the rail next to it). */
+  function gapEnds(m) {
+    const a = m.balls[m.gap[0]];
+    if (typeof m.gap[1] === 'number') return [a, m.balls[m.gap[1]]];
+    const rail = m.gap[1];
+    return [a, rail === 'top' ? { x: a.x, y: 0 } : rail === 'bottom' ? { x: a.x, y: H } : rail === 'left' ? { x: 0, y: a.y } : { x: W, y: a.y }];
+  }
+  function gapWidth(m) { const [a, b] = gapEnds(m); return Math.hypot(a.x - b.x, a.y - b.y) - (typeof m.gap[1] === 'number' ? D : R); }
+  /* Final verdict for a finished shot. run = { line, trail (cue polyline), finals (all balls at rest) }. */
+  function judge(m, run) {
+    const goal = m.goal, s = scan(goal, run.line, m.balls);
+    const out = { ok: false, why: s.why, pre: s.pre, mid: s.mid, rails: s.rails, spread: 0 };
+    if (s.status === 'open') { out.why = 'noscore'; return out; }
+    if (s.status === 'fail') return out;
+    if (run.line.some(ev => ev.k === 'ball' && ev.b === YELLOW)) { out.why = 'yellow'; return out; }
+    if (m.gap) {
+      const [a, b] = gapEnds(m);
+      if (!(run.trail.length > 1 && cross(run.trail[0], run.trail[1], a, b))) { out.why = 'gap'; return out; }
+    }
+    if (goal.gather) {
+      const p = [run.finals[0], run.finals[1], run.finals[2]];
+      out.spread = Math.max(Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y), Math.hypot(p[0].x - p[2].x, p[0].y - p[2].y), Math.hypot(p[1].x - p[2].x, p[1].y - p[2].y));
+      if (out.spread > goal.gather) { out.why = 'gather'; return out; }
+    }
+    out.ok = true; out.why = '';
+    return out;
+  }
+  const ballName = i => ['흰공', '적구 ①', '적구 ②', '노란공'][i];
+  const railName = r => ({ top: '위쪽 장쿠션', bottom: '아래쪽 장쿠션', left: '왼쪽 단쿠션', right: '오른쪽 단쿠션' })[r];
+  function gapText(m) { return typeof m.gap[1] === 'number' ? `${ballName(m.gap[0])}과 ${ballName(m.gap[1])} 사이` : `${ballName(m.gap[0])}과 ${railName(m.gap[1])} 사이`; }
+  /* Goal in words: [short, full]. */
+  function describe(m) {
+    const tail = ' 노란공을 맞히면 실패입니다.';
+    switch (m.cat) {
+      case 'direct': return ['쿠션 없이 적구 → 적구', '쿠션을 거치지 않고 적구 두 개를 차례로 맞히세요.' + tail];
+      case 'c1': return ['적구 → 쿠션 1회 → 적구', '적구 하나를 맞힌 뒤 쿠션을 정확히 1회 거쳐 나머지 적구를 맞히세요.' + tail];
+      case 'c2': return ['적구 → 쿠션 2회 → 적구', '적구 하나를 맞힌 뒤 쿠션을 정확히 2회 거쳐 나머지 적구를 맞히세요.' + tail];
+      case 'kiss': return ['쿠션 1회 먼저 → 적구 → 적구', '쿠션을 먼저 1회 맞힌 뒤 적구 두 개를 맞히세요. 두 적구 사이 쿠션은 1회까지 됩니다.' + tail];
+      case 'bank': return ['쿠션 2~3회 먼저 → 적구 두 개', '쿠션을 2~3회 먼저 맞힌 뒤 적구 두 개를 맞히세요.' + tail];
+      case 'gather': return [`득점 + 세 공 ${m.goal.gather}mm 안에 모으기`, `쿠션보다 적구를 먼저 맞혀 득점하고, 모두 멈췄을 때 흰공과 두 적구의 중심 간격이 모두 ${m.goal.gather}mm 이내가 되게 하세요.` + tail];
+      case 'gap': return [`${gapText(m)} 틈 통과 → 득점`, `${gapText(m)} 틈(여유 ${Math.round(gapWidth(m) - D)}mm)을 건드리지 않고 지나간 뒤 적구 두 개를 맞히세요.` + tail];
+      case 'back': return ['적구 → 가까운 장쿠션부터 장·단·장 → 적구', '첫 적구를 맞힌 뒤, 그 적구에서 가까운 장쿠션부터 장-단-장 순서로 쿠션을 3회 이상 돌려 나머지 적구를 맞히세요.' + tail];
+      case 'front': return ['적구 → 먼 장쿠션부터 장·단·장 → 적구', '첫 적구를 맞힌 뒤, 그 적구에서 먼 쪽 장쿠션부터 장-단-장 순서로 쿠션을 3회 이상 돌려 나머지 적구를 맞히세요.' + tail];
+      case 'side': return ['적구 → 단·장 쿠션부터 3쿠션 → 적구', '첫 적구를 맞힌 뒤 단쿠션-장쿠션 순서로 시작해 쿠션을 3회 이상 거쳐 나머지 적구를 맞히세요.' + tail];
+      case 'big': return ['적구 → 쿠션 4회 이상 → 적구', '첫 적구를 맞힌 뒤 쿠션을 4회 이상 크게 돌려 나머지 적구를 맞히세요.' + tail];
+      case 'cross': return ['적구 → 장·장·장 횡단 → 적구', '첫 적구를 맞힌 뒤 위아래 장쿠션만 3회 이상 오가며 나머지 적구를 맞히세요.' + tail];
+    }
+    return ['', ''];
+  }
+  function reason(m, v) {
+    const g = m.goal, order = v.rails.map(kindOf).join('-') || '없음';
+    switch (v.why) {
+      case 'yellow': return '노란공을 맞혔습니다.';
+      case 'noscore': return '적구 두 개를 모두 맞히지 못했습니다.';
+      case 'pre': return `첫 적구 전 쿠션 ${v.pre}회 · 조건은 ${g.pre[0] === g.pre[1] ? g.pre[0] + '회' : g.pre[0] + '~' + g.pre[1] + '회'}입니다.`;
+      case 'mid': return `두 적구 사이 쿠션 ${v.mid}회 · 조건은 ${g.mid[0] === g.mid[1] ? g.mid[0] + '회' : g.mid[0] + '~' + g.mid[1] + '회'}입니다.`;
+      case 'pattern': return `쿠션 순서 ${order} · 조건은 ${g.pattern.join('-')}입니다.`;
+      case 'firstRail': return `첫 쿠션이 ${g.firstRail === 'near' ? '먼' : '가까운'} 쪽 장쿠션이었습니다.`;
+      case 'gap': return '틈을 통과하지 않았습니다.';
+      case 'gather': return `득점했지만 세 공 간격이 ${Math.round(v.spread)}mm · 조건은 ${g.gather}mm 이내입니다.`;
+    }
+    return '';
+  }
+  return { CATS, timeline, scan, judge, describe, reason, gapEnds, gapWidth, kindOf, railOf, W, H, R, D };
+})();
+if (typeof module !== 'undefined') module.exports = MissionCore;
+</script>
 <script id="app-script">
 (() => {
   'use strict';
-  const VERSION = 'mobile 1.0';
+  const VERSION = 'mobile 2.0', BUILD = document.querySelector('meta[name="app-build"]').content, UPDATES = ('serviceWorker' in navigator);
   const W = 2448, H = 1224, D = 65.5, R = D / 2, NS = 'http://www.w3.org/2000/svg', DT = 1 / 240;
   const KEY = 'jun-carom-mobile-v1', SLOP = 7, FINE = 0.2, CUE_LEN = 1400;
   const $ = id => document.getElementById(id);
@@ -463,9 +651,15 @@ globalThis.CaromPhysics = CaromPhysics;
   let mode = 'shot', state = 'ready', selected = 0, cue = 0, angleDeg = 20, powerPct = 45, stepMm = 5;
   let armed = false, gesture = null, lastShot = null, history = [], raf = 0, previousTime = null, accumulator = 0;
   let rotated = false, scale = 1, vb = VIEWBOX.tight, prediction = null, predictionKey = '';
-  let loupeUntil = 0, loupeTimer = 0, shootLabel = '', renderQueued = false, saveTimer = 0, toastTimer = 0, wakeLock = null, tab = 'result';
+  let loupeUntil = 0, loupeSide = 'L', newBuild = '', checking = false, lastCheck = 0, loupeTimer = 0, shootLabel = '', renderQueued = false, saveTimer = 0, toastTimer = 0, wakeLock = null, tab = 'result';
   let report = { title: '무회전 샷 연습', text: '점선은 수구의 예상 경로(두 번째 충돌까지), 색 실선은 실제 계산된 이동 궤적입니다.' };
 
+  const MISSIONS = [{"id":"150-direct-1","course":150,"cat":"direct","no":1,"balls":[{"x":1498,"y":184},{"x":1252,"y":349},{"x":1363,"y":422},{"x":2041,"y":380}],"goal":{"pre":[0,0],"mid":[0,0]},"sol":{"a":236,"p":35}},{"id":"150-direct-2","course":150,"cat":"direct","no":2,"balls":[{"x":1457,"y":657},{"x":1205,"y":776},{"x":1386,"y":805},{"x":1216,"y":251}],"goal":{"pre":[0,0],"mid":[0,0]},"sol":{"a":226.4,"p":35}},{"id":"150-direct-3","course":150,"cat":"direct","no":3,"balls":[{"x":1294,"y":623},{"x":1689,"y":743},{"x":1643,"y":631},{"x":1353,"y":317}],"goal":{"pre":[0,0],"mid":[0,0]},"sol":{"a":351.31,"p":35}},{"id":"150-c1-1","course":150,"cat":"c1","no":1,"balls":[{"x":2372,"y":424},{"x":2047,"y":238},{"x":2125,"y":382},{"x":1984,"y":1061}],"goal":{"pre":[0,0],"mid":[1,1]},"sol":{"a":163.45,"p":35}},{"id":"150-c1-2","course":150,"cat":"c1","no":2,"balls":[{"x":1343,"y":116},{"x":1495,"y":74},{"x":1381,"y":509},{"x":94,"y":463}],"goal":{"pre":[0,0],"mid":[1,1]},"sol":{"a":22.99,"p":65}},{"id":"150-c1-3","course":150,"cat":"c1","no":3,"balls":[{"x":1727,"y":938},{"x":2326,"y":441},{"x":1924,"y":911},{"x":409,"y":618}],"goal":{"pre":[0,0],"mid":[1,1]},"sol":{"a":2.29,"p":65}},{"id":"150-c2-1","course":150,"cat":"c2","no":1,"balls":[{"x":384,"y":445},{"x":494,"y":1033},{"x":220,"y":847},{"x":1398,"y":189}],"goal":{"pre":[0,0],"mid":[2,2]},"sol":{"a":276.94,"p":65}},{"id":"150-c2-2","course":150,"cat":"c2","no":2,"balls":[{"x":2155,"y":612},{"x":2144,"y":773},{"x":1247,"y":367},{"x":303,"y":222}],"goal":{"pre":[0,0],"mid":[2,2]},"sol":{"a":250.92,"p":65}},{"id":"150-c2-3","course":150,"cat":"c2","no":3,"balls":[{"x":808,"y":58},{"x":1134,"y":214},{"x":782,"y":181},{"x":619,"y":630}],"goal":{"pre":[0,0],"mid":[2,2]},"sol":{"a":279.2,"p":55}},{"id":"150-kiss-1","course":150,"cat":"kiss","no":1,"balls":[{"x":1420,"y":191},{"x":1861,"y":655},{"x":1991,"y":607},{"x":377,"y":1000}],"goal":{"pre":[1,1],"mid":[0,1]},"sol":{"a":61.79,"p":65}},{"id":"150-kiss-2","course":150,"cat":"kiss","no":2,"balls":[{"x":723,"y":887},{"x":362,"y":719},{"x":334,"y":595},{"x":2361,"y":391}],"goal":{"pre":[1,1],"mid":[0,1]},"sol":{"a":169.8,"p":55}},{"id":"150-kiss-3","course":150,"cat":"kiss","no":3,"balls":[{"x":1919,"y":624},{"x":2173,"y":921},{"x":2165,"y":1036},{"x":1138,"y":240}],"goal":{"pre":[1,1],"mid":[0,1]},"sol":{"a":333.92,"p":55}},{"id":"150-bank-1","course":150,"cat":"bank","no":1,"balls":[{"x":205,"y":801},{"x":2160,"y":884},{"x":2317,"y":1018},{"x":2299,"y":129}],"goal":{"pre":[2,3],"mid":[0,6]},"sol":{"a":39.18,"p":65}},{"id":"150-bank-2","course":150,"cat":"bank","no":2,"balls":[{"x":2111,"y":294},{"x":817,"y":768},{"x":730,"y":981},{"x":799,"y":413}],"goal":{"pre":[2,3],"mid":[0,6]},"sol":{"a":40.69,"p":65}},{"id":"150-bank-3","course":150,"cat":"bank","no":3,"balls":[{"x":818,"y":210},{"x":1087,"y":559},{"x":1141,"y":409},{"x":1658,"y":663}],"goal":{"pre":[2,3],"mid":[0,6]},"sol":{"a":38.19,"p":65}},{"id":"150-gather-1","course":150,"cat":"gather","no":1,"balls":[{"x":2299,"y":594},{"x":2012,"y":291},{"x":2158,"y":630},{"x":2146,"y":1070}],"goal":{"pre":[0,0],"mid":[0,2],"gather":520},"sol":{"a":186.94,"p":32}},{"id":"150-gather-2","course":150,"cat":"gather","no":2,"balls":[{"x":1271,"y":676},{"x":1536,"y":1023},{"x":1681,"y":985},{"x":814,"y":1065}],"goal":{"pre":[0,0],"mid":[0,2],"gather":520},"sol":{"a":319.41,"p":22}},{"id":"150-gather-3","course":150,"cat":"gather","no":3,"balls":[{"x":1065,"y":1083},{"x":1292,"y":887},{"x":1244,"y":777},{"x":1933,"y":1133}],"goal":{"pre":[0,0],"mid":[0,2],"gather":520},"sol":{"a":55.39,"p":22}},{"id":"150-gap-1","course":150,"cat":"gap","no":1,"balls":[{"x":1309.4,"y":945},{"x":199.1,"y":852.7},{"x":167.9,"y":741.7},{"x":854.5,"y":1065.8}],"goal":{"pre":[0,3],"mid":[0,6],"gap":true},"sol":{"a":205.55,"p":35},"gap":[3,"bottom"]},{"id":"150-gap-2","course":150,"cat":"gap","no":2,"balls":[{"x":1766.6,"y":1032.5},{"x":1294.8,"y":408.5},{"x":1082.9,"y":113.5},{"x":1449.2,"y":289.5}],"goal":{"pre":[0,3],"mid":[0,6],"gap":true},"sol":{"a":120.44,"p":35},"gap":[3,1]},{"id":"150-gap-3","course":150,"cat":"gap","no":3,"balls":[{"x":327.6,"y":923.7},{"x":266.7,"y":202.9},{"x":848.8,"y":127.4},{"x":178.3,"y":619.6}],"goal":{"pre":[0,3],"mid":[0,6],"gap":true},"sol":{"a":131.94,"p":35},"gap":[3,"left"]},{"id":"150-back-1","course":150,"cat":"back","no":1,"balls":[{"x":824,"y":490},{"x":1934,"y":221},{"x":848,"y":285},{"x":87,"y":186}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"near"},"sol":{"a":96.41,"p":65}},{"id":"150-back-2","course":150,"cat":"back","no":2,"balls":[{"x":977,"y":821},{"x":682,"y":732},{"x":1990,"y":1038},{"x":1249,"y":1146}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"near"},"sol":{"a":169.44,"p":65}},{"id":"150-back-3","course":150,"cat":"back","no":3,"balls":[{"x":1547,"y":480},{"x":1148,"y":229},{"x":1485,"y":201},{"x":464,"y":795}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"near"},"sol":{"a":92.88,"p":55}},{"id":"150-front-1","course":150,"cat":"front","no":1,"balls":[{"x":1041,"y":548},{"x":84,"y":217},{"x":850,"y":542},{"x":681,"y":928}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"far"},"sol":{"a":196.99,"p":65}},{"id":"150-front-2","course":150,"cat":"front","no":2,"balls":[{"x":1702,"y":124},{"x":1386,"y":105},{"x":1270,"y":741},{"x":2258,"y":1141}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"far"},"sol":{"a":184.76,"p":65}},{"id":"150-front-3","course":150,"cat":"front","no":3,"balls":[{"x":1697,"y":975},{"x":112,"y":855},{"x":1669,"y":657},{"x":1593,"y":1042}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"far"},"sol":{"a":84.24,"p":65}},{"id":"150-side-1","course":150,"cat":"side","no":1,"balls":[{"x":1618,"y":514},{"x":1723,"y":447},{"x":403,"y":1019},{"x":2040,"y":355}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["단","장"]},"sol":{"a":16.49,"p":65}},{"id":"150-side-2","course":150,"cat":"side","no":2,"balls":[{"x":849,"y":584},{"x":1159,"y":701},{"x":116,"y":607},{"x":2189,"y":711}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["단","장"]},"sol":{"a":179.4,"p":65}},{"id":"150-side-3","course":150,"cat":"side","no":3,"balls":[{"x":232,"y":769},{"x":1622,"y":473},{"x":178,"y":1012},{"x":2077,"y":274}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["단","장"]},"sol":{"a":248.9,"p":65}},{"id":"150-big-1","course":150,"cat":"big","no":1,"balls":[{"x":733,"y":967},{"x":1737,"y":932},{"x":348,"y":870},{"x":347,"y":123}],"goal":{"pre":[0,0],"mid":[4,7]},"sol":{"a":159.31,"p":65}},{"id":"150-big-2","course":150,"cat":"big","no":2,"balls":[{"x":654,"y":896},{"x":1644,"y":1121},{"x":864,"y":1034},{"x":2215,"y":1050}],"goal":{"pre":[0,0],"mid":[4,7]},"sol":{"a":337.6,"p":65}},{"id":"150-big-3","course":150,"cat":"big","no":3,"balls":[{"x":1387,"y":443},{"x":402,"y":924},{"x":1310,"y":803},{"x":2299,"y":810}],"goal":{"pre":[0,0],"mid":[4,7]},"sol":{"a":250.32,"p":65}},{"id":"150-cross-1","course":150,"cat":"cross","no":1,"balls":[{"x":2165,"y":609},{"x":636,"y":169},{"x":2246,"y":796},{"x":1678,"y":662}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","장","장"]},"sol":{"a":276.17,"p":65}},{"id":"150-cross-2","course":150,"cat":"cross","no":2,"balls":[{"x":1870,"y":685},{"x":1664,"y":399},{"x":2174,"y":374},{"x":248,"y":1006}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","장","장"]},"sol":{"a":116.91,"p":65}},{"id":"150-cross-3","course":150,"cat":"cross","no":3,"balls":[{"x":1092,"y":580},{"x":912,"y":752},{"x":1517,"y":64},{"x":226,"y":241}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","장","장"]},"sol":{"a":235.02,"p":65}},{"id":"200-direct-1","course":200,"cat":"direct","no":1,"balls":[{"x":1070,"y":220},{"x":746,"y":349},{"x":624,"y":389},{"x":362,"y":794}],"goal":{"pre":[0,0],"mid":[0,0]},"sol":{"a":202.27,"p":55}},{"id":"200-direct-2","course":200,"cat":"direct","no":2,"balls":[{"x":1379,"y":916},{"x":1294,"y":495},{"x":1273,"y":1131},{"x":854,"y":1003}],"goal":{"pre":[0,0],"mid":[0,0]},"sol":{"a":240.23,"p":40}},{"id":"200-direct-3","course":200,"cat":"direct","no":3,"balls":[{"x":260,"y":377},{"x":1506,"y":1104},{"x":1747,"y":1043},{"x":69,"y":762}],"goal":{"pre":[0,0],"mid":[0,0]},"sol":{"a":331.92,"p":40}},{"id":"200-c1-1","course":200,"cat":"c1","no":1,"balls":[{"x":1683,"y":302},{"x":1060,"y":858},{"x":363,"y":475},{"x":1552,"y":682}],"goal":{"pre":[0,0],"mid":[1,1]},"sol":{"a":219.09,"p":40}},{"id":"200-c1-2","course":200,"cat":"c1","no":2,"balls":[{"x":1714,"y":120},{"x":1160,"y":386},{"x":2196,"y":751},{"x":1540,"y":572}],"goal":{"pre":[0,0],"mid":[1,1]},"sol":{"a":309.54,"p":65}},{"id":"200-c1-3","course":200,"cat":"c1","no":3,"balls":[{"x":1962,"y":408},{"x":617,"y":989},{"x":1960,"y":217},{"x":262,"y":689}],"goal":{"pre":[0,0],"mid":[1,1]},"sol":{"a":108.75,"p":40}},{"id":"200-c2-1","course":200,"cat":"c2","no":1,"balls":[{"x":1576,"y":872},{"x":979,"y":769},{"x":1901,"y":315},{"x":2105,"y":737}],"goal":{"pre":[0,0],"mid":[2,2]},"sol":{"a":63.61,"p":40}},{"id":"200-c2-2","course":200,"cat":"c2","no":2,"balls":[{"x":1848,"y":1149},{"x":355,"y":379},{"x":1385,"y":886},{"x":1086,"y":263}],"goal":{"pre":[0,0],"mid":[2,2]},"sol":{"a":153.73,"p":65}},{"id":"200-c2-3","course":200,"cat":"c2","no":3,"balls":[{"x":1100,"y":1017},{"x":677,"y":442},{"x":1792,"y":1137},{"x":1868,"y":795}],"goal":{"pre":[0,0],"mid":[2,2]},"sol":{"a":128.85,"p":65}},{"id":"200-kiss-1","course":200,"cat":"kiss","no":1,"balls":[{"x":1880,"y":812},{"x":761,"y":1160},{"x":2070,"y":286},{"x":534,"y":537}],"goal":{"pre":[1,1],"mid":[0,1]},"sol":{"a":81.32,"p":65}},{"id":"200-kiss-2","course":200,"cat":"kiss","no":2,"balls":[{"x":964,"y":668},{"x":1856,"y":585},{"x":1147,"y":877},{"x":2140,"y":382}],"goal":{"pre":[1,1],"mid":[0,1]},"sol":{"a":284.24,"p":65}},{"id":"200-kiss-3","course":200,"cat":"kiss","no":3,"balls":[{"x":900,"y":671},{"x":540,"y":734},{"x":1398,"y":373},{"x":1933,"y":885}],"goal":{"pre":[1,1],"mid":[0,1]},"sol":{"a":66.18,"p":65}},{"id":"200-bank-1","course":200,"cat":"bank","no":1,"balls":[{"x":1085,"y":188},{"x":1360,"y":435},{"x":2049,"y":86},{"x":547,"y":894}],"goal":{"pre":[2,3],"mid":[0,6]},"sol":{"a":167.77,"p":65}},{"id":"200-bank-2","course":200,"cat":"bank","no":2,"balls":[{"x":2370,"y":483},{"x":1064,"y":353},{"x":1951,"y":312},{"x":316,"y":574}],"goal":{"pre":[2,3],"mid":[0,6]},"sol":{"a":289.55,"p":65}},{"id":"200-bank-3","course":200,"cat":"bank","no":3,"balls":[{"x":1911,"y":113},{"x":1368,"y":1156},{"x":2298,"y":778},{"x":1457,"y":118}],"goal":{"pre":[2,3],"mid":[0,6]},"sol":{"a":80.9,"p":65}},{"id":"200-gather-1","course":200,"cat":"gather","no":1,"balls":[{"x":699,"y":801},{"x":809,"y":350},{"x":650,"y":425},{"x":1968,"y":798}],"goal":{"pre":[0,0],"mid":[0,2],"gather":420},"sol":{"a":92.18,"p":32}},{"id":"200-gather-2","course":200,"cat":"gather","no":2,"balls":[{"x":339,"y":564},{"x":222,"y":817},{"x":430,"y":889},{"x":979,"y":534}],"goal":{"pre":[0,0],"mid":[0,2],"gather":420},"sol":{"a":250.53,"p":32}},{"id":"200-gather-3","course":200,"cat":"gather","no":3,"balls":[{"x":2312,"y":1092},{"x":1822,"y":814},{"x":2002,"y":504},{"x":857,"y":299}],"goal":{"pre":[0,0],"mid":[0,2],"gather":420},"sol":{"a":148.58,"p":32}},{"id":"200-gap-1","course":200,"cat":"gap","no":1,"balls":[{"x":1913.4,"y":1079.2},{"x":1213.6,"y":623.5},{"x":1637.4,"y":1064.8},{"x":831.5,"y":866.6}],"goal":{"pre":[0,3],"mid":[0,6],"gap":true},"sol":{"a":192.72,"p":35},"gap":[2,"bottom"]},{"id":"200-gap-2","course":200,"cat":"gap","no":2,"balls":[{"x":918.6,"y":919.4},{"x":2022.6,"y":907.7},{"x":1780.7,"y":1008},{"x":1317.8,"y":1066.8}],"goal":{"pre":[0,3],"mid":[0,6],"gap":true},"sol":{"a":327.85,"p":35},"gap":[3,"bottom"]},{"id":"200-gap-3","course":200,"cat":"gap","no":3,"balls":[{"x":1670.1,"y":1020.3},{"x":1115.3,"y":933.3},{"x":537.2,"y":319.4},{"x":1212.7,"y":766.7}],"goal":{"pre":[0,3],"mid":[0,6],"gap":true},"sol":{"a":163.38,"p":35},"gap":[3,1]},{"id":"200-back-1","course":200,"cat":"back","no":1,"balls":[{"x":1965,"y":78},{"x":2219,"y":83},{"x":228,"y":477},{"x":1718,"y":1028}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"near"},"sol":{"a":11.22,"p":65}},{"id":"200-back-2","course":200,"cat":"back","no":2,"balls":[{"x":1216,"y":382},{"x":1189,"y":712},{"x":271,"y":112},{"x":1318,"y":713}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"near"},"sol":{"a":254.55,"p":65}},{"id":"200-back-3","course":200,"cat":"back","no":3,"balls":[{"x":550,"y":807},{"x":876,"y":873},{"x":1314,"y":396},{"x":199,"y":355}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"near"},"sol":{"a":337.59,"p":40}},{"id":"200-front-1","course":200,"cat":"front","no":1,"balls":[{"x":518,"y":573},{"x":1420,"y":731},{"x":1282,"y":900},{"x":772,"y":340}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"far"},"sol":{"a":352.43,"p":65}},{"id":"200-front-2","course":200,"cat":"front","no":2,"balls":[{"x":637,"y":772},{"x":1692,"y":787},{"x":507,"y":163},{"x":778,"y":675}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"far"},"sol":{"a":1.35,"p":65}},{"id":"200-front-3","course":200,"cat":"front","no":3,"balls":[{"x":435,"y":446},{"x":841,"y":273},{"x":1527,"y":1127},{"x":1403,"y":466}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"far"},"sol":{"a":17.43,"p":65}},{"id":"200-side-1","course":200,"cat":"side","no":1,"balls":[{"x":1844,"y":939},{"x":1580,"y":1128},{"x":1199,"y":936},{"x":965,"y":370}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["단","장"]},"sol":{"a":174.19,"p":40}},{"id":"200-side-2","course":200,"cat":"side","no":2,"balls":[{"x":523,"y":915},{"x":2329,"y":700},{"x":1211,"y":1084},{"x":219,"y":560}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["단","장"]},"sol":{"a":349.75,"p":65}},{"id":"200-side-3","course":200,"cat":"side","no":3,"balls":[{"x":1040,"y":532},{"x":886,"y":902},{"x":2293,"y":185},{"x":1921,"y":1073}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["단","장"]},"sol":{"a":240.15,"p":40}},{"id":"200-big-1","course":200,"cat":"big","no":1,"balls":[{"x":1291,"y":83},{"x":2037,"y":220},{"x":1516,"y":861},{"x":2238,"y":105}],"goal":{"pre":[0,0],"mid":[4,7]},"sol":{"a":283.01,"p":65}},{"id":"200-big-2","course":200,"cat":"big","no":2,"balls":[{"x":1466,"y":770},{"x":1646,"y":179},{"x":890,"y":623},{"x":523,"y":896}],"goal":{"pre":[0,0],"mid":[4,7]},"sol":{"a":77.36,"p":65}},{"id":"200-big-3","course":200,"cat":"big","no":3,"balls":[{"x":2148,"y":849},{"x":1992,"y":416},{"x":994,"y":1120},{"x":455,"y":285}],"goal":{"pre":[0,0],"mid":[4,7]},"sol":{"a":103.07,"p":65}},{"id":"200-cross-1","course":200,"cat":"cross","no":1,"balls":[{"x":1876,"y":385},{"x":1375,"y":282},{"x":402,"y":114},{"x":2105,"y":661}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","장","장"]},"sol":{"a":164.74,"p":65}},{"id":"200-cross-2","course":200,"cat":"cross","no":2,"balls":[{"x":568,"y":347},{"x":534,"y":1057},{"x":878,"y":783},{"x":2380,"y":677}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","장","장"]},"sol":{"a":300.14,"p":65}},{"id":"200-cross-3","course":200,"cat":"cross","no":3,"balls":[{"x":1753,"y":493},{"x":2262,"y":114},{"x":2062,"y":1091},{"x":600,"y":741}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","장","장"]},"sol":{"a":40.25,"p":65}},{"id":"300-direct-1","course":300,"cat":"direct","no":1,"balls":[{"x":97,"y":499},{"x":821,"y":960},{"x":1621,"y":1138},{"x":69,"y":1053}],"goal":{"pre":[0,0],"mid":[0,0]},"sol":{"a":331.8,"p":65}},{"id":"300-direct-2","course":300,"cat":"direct","no":2,"balls":[{"x":1246,"y":678},{"x":115,"y":675},{"x":1124,"y":986},{"x":787,"y":1101}],"goal":{"pre":[0,0],"mid":[0,0]},"sol":{"a":179.98,"p":65}},{"id":"300-direct-3","course":300,"cat":"direct","no":3,"balls":[{"x":1248,"y":187},{"x":194,"y":628},{"x":390,"y":556},{"x":1941,"y":888}],"goal":{"pre":[0,0],"mid":[0,0]},"sol":{"a":204.39,"p":40}},{"id":"300-c1-1","course":300,"cat":"c1","no":1,"balls":[{"x":1344,"y":1105},{"x":2321,"y":216},{"x":732,"y":440},{"x":1666,"y":102}],"goal":{"pre":[0,0],"mid":[1,1]},"sol":{"a":135.79,"p":65}},{"id":"300-c1-2","course":300,"cat":"c1","no":2,"balls":[{"x":1198,"y":733},{"x":1623,"y":646},{"x":1922,"y":734},{"x":2208,"y":527}],"goal":{"pre":[0,0],"mid":[1,1]},"sol":{"a":17.65,"p":35}},{"id":"300-c1-3","course":300,"cat":"c1","no":3,"balls":[{"x":1238,"y":458},{"x":2222,"y":137},{"x":1530,"y":1072},{"x":337,"y":882}],"goal":{"pre":[0,0],"mid":[1,1]},"sol":{"a":15.75,"p":40}},{"id":"300-c2-1","course":300,"cat":"c2","no":1,"balls":[{"x":1360,"y":596},{"x":96,"y":488},{"x":1084,"y":329},{"x":106,"y":664}],"goal":{"pre":[0,0],"mid":[2,2]},"sol":{"a":172.37,"p":40}},{"id":"300-c2-2","course":300,"cat":"c2","no":2,"balls":[{"x":2201,"y":396},{"x":539,"y":344},{"x":1008,"y":122},{"x":1025,"y":668}],"goal":{"pre":[0,0],"mid":[2,2]},"sol":{"a":179.59,"p":40}},{"id":"300-c2-3","course":300,"cat":"c2","no":3,"balls":[{"x":702,"y":546},{"x":2327,"y":509},{"x":1682,"y":217},{"x":2103,"y":251}],"goal":{"pre":[0,0],"mid":[2,2]},"sol":{"a":20.63,"p":65}},{"id":"300-kiss-1","course":300,"cat":"kiss","no":1,"balls":[{"x":887,"y":383},{"x":1135,"y":806},{"x":2322,"y":481},{"x":1586,"y":758}],"goal":{"pre":[1,1],"mid":[0,1]},"sol":{"a":283.76,"p":65}},{"id":"300-kiss-2","course":300,"cat":"kiss","no":2,"balls":[{"x":771,"y":1141},{"x":78,"y":98},{"x":1626,"y":1031},{"x":1099,"y":165}],"goal":{"pre":[1,1],"mid":[0,1]},"sol":{"a":243.19,"p":65}},{"id":"300-kiss-3","course":300,"cat":"kiss","no":3,"balls":[{"x":961,"y":120},{"x":725,"y":918},{"x":1818,"y":1069},{"x":291,"y":391}],"goal":{"pre":[1,1],"mid":[0,1]},"sol":{"a":262.6,"p":65}},{"id":"300-bank-1","course":300,"cat":"bank","no":1,"balls":[{"x":771,"y":311},{"x":2320,"y":341},{"x":410,"y":224},{"x":185,"y":137}],"goal":{"pre":[2,3],"mid":[0,6]},"sol":{"a":238.82,"p":65}},{"id":"300-bank-2","course":300,"cat":"bank","no":2,"balls":[{"x":942,"y":371},{"x":1370,"y":65},{"x":2374,"y":496},{"x":308,"y":217}],"goal":{"pre":[2,3],"mid":[0,6]},"sol":{"a":217.02,"p":65}},{"id":"300-bank-3","course":300,"cat":"bank","no":3,"balls":[{"x":1812,"y":1056},{"x":2375,"y":189},{"x":1026,"y":1129},{"x":1393,"y":273}],"goal":{"pre":[2,3],"mid":[0,6]},"sol":{"a":286.77,"p":65}},{"id":"300-gather-1","course":300,"cat":"gather","no":1,"balls":[{"x":533,"y":364},{"x":317,"y":624},{"x":543,"y":901},{"x":130,"y":1125}],"goal":{"pre":[0,0],"mid":[0,2],"gather":320},"sol":{"a":221.47,"p":44}},{"id":"300-gather-2","course":300,"cat":"gather","no":2,"balls":[{"x":1841,"y":345},{"x":1010,"y":569},{"x":886,"y":574},{"x":1732,"y":1038}],"goal":{"pre":[0,0],"mid":[0,2],"gather":320},"sol":{"a":196.27,"p":22}},{"id":"300-gather-3","course":300,"cat":"gather","no":3,"balls":[{"x":1871,"y":551},{"x":1136,"y":917},{"x":1049,"y":722},{"x":2057,"y":892}],"goal":{"pre":[0,0],"mid":[0,2],"gather":320},"sol":{"a":192.83,"p":22}},{"id":"300-gap-1","course":300,"cat":"gap","no":1,"balls":[{"x":641.9,"y":591},{"x":957.6,"y":644},{"x":1631,"y":736.4},{"x":928.4,"y":848}],"goal":{"pre":[0,3],"mid":[0,6],"gap":true},"sol":{"a":335.95,"p":35},"gap":[3,1]},{"id":"300-gap-2","course":300,"cat":"gap","no":2,"balls":[{"x":510.3,"y":1027.8},{"x":1583.7,"y":460.9},{"x":911.7,"y":1063.8},{"x":1902.7,"y":378.5}],"goal":{"pre":[0,3],"mid":[0,6],"gap":true},"sol":{"a":341.15,"p":35},"gap":[2,"bottom"]},{"id":"300-gap-3","course":300,"cat":"gap","no":3,"balls":[{"x":1923.5,"y":247.7},{"x":887.6,"y":182.8},{"x":1339.2,"y":168.3},{"x":762,"y":234.8}],"goal":{"pre":[0,3],"mid":[0,6],"gap":true},"sol":{"a":162.92,"p":35},"gap":[2,"top"]},{"id":"300-back-1","course":300,"cat":"back","no":1,"balls":[{"x":459,"y":670},{"x":871,"y":715},{"x":839,"y":152},{"x":1689,"y":240}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"near"},"sol":{"a":344.99,"p":40}},{"id":"300-back-2","course":300,"cat":"back","no":2,"balls":[{"x":2034,"y":747},{"x":2136,"y":972},{"x":675,"y":566},{"x":111,"y":295}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"near"},"sol":{"a":170.64,"p":65}},{"id":"300-back-3","course":300,"cat":"back","no":3,"balls":[{"x":2380,"y":627},{"x":1813,"y":480},{"x":1766,"y":634},{"x":844,"y":103}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"near"},"sol":{"a":185.59,"p":65}},{"id":"300-front-1","course":300,"cat":"front","no":1,"balls":[{"x":2115,"y":713},{"x":689,"y":666},{"x":900,"y":717},{"x":1859,"y":474}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"far"},"sol":{"a":178.57,"p":65}},{"id":"300-front-2","course":300,"cat":"front","no":2,"balls":[{"x":1691,"y":1117},{"x":2172,"y":922},{"x":882,"y":1012},{"x":1335,"y":353}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"far"},"sol":{"a":169.56,"p":65}},{"id":"300-front-3","course":300,"cat":"front","no":3,"balls":[{"x":1573,"y":1152},{"x":316,"y":684},{"x":710,"y":696},{"x":527,"y":1007}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","단","장"],"firstRail":"far"},"sol":{"a":157.6,"p":65}},{"id":"300-side-1","course":300,"cat":"side","no":1,"balls":[{"x":1799,"y":1087},{"x":1036,"y":620},{"x":1971,"y":184},{"x":1170,"y":138}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["단","장"]},"sol":{"a":151.17,"p":65}},{"id":"300-side-2","course":300,"cat":"side","no":2,"balls":[{"x":945,"y":1147},{"x":666,"y":367},{"x":1252,"y":591},{"x":1617,"y":669}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["단","장"]},"sol":{"a":56.38,"p":65}},{"id":"300-side-3","course":300,"cat":"side","no":3,"balls":[{"x":2082,"y":1039},{"x":1260,"y":158},{"x":639,"y":592},{"x":1668,"y":820}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["단","장"]},"sol":{"a":160.4,"p":65}},{"id":"300-big-1","course":300,"cat":"big","no":1,"balls":[{"x":577,"y":432},{"x":1342,"y":348},{"x":1467,"y":978},{"x":1215,"y":880}],"goal":{"pre":[0,0],"mid":[4,7]},"sol":{"a":2.44,"p":65}},{"id":"300-big-2","course":300,"cat":"big","no":2,"balls":[{"x":1750,"y":311},{"x":1117,"y":243},{"x":1001,"y":60},{"x":1456,"y":335}],"goal":{"pre":[0,0],"mid":[4,7]},"sol":{"a":165.02,"p":55}},{"id":"300-big-3","course":300,"cat":"big","no":3,"balls":[{"x":1066,"y":155},{"x":1450,"y":459},{"x":2268,"y":300},{"x":103,"y":389}],"goal":{"pre":[0,0],"mid":[4,7]},"sol":{"a":355.36,"p":65}},{"id":"300-cross-1","course":300,"cat":"cross","no":1,"balls":[{"x":1749,"y":883},{"x":1483,"y":648},{"x":504,"y":1121},{"x":592,"y":928}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","장","장"]},"sol":{"a":192.82,"p":65}},{"id":"300-cross-2","course":300,"cat":"cross","no":2,"balls":[{"x":1524,"y":512},{"x":391,"y":925},{"x":1237,"y":71},{"x":233,"y":804}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","장","장"]},"sol":{"a":116.41,"p":65}},{"id":"300-cross-3","course":300,"cat":"cross","no":3,"balls":[{"x":716,"y":960},{"x":879,"y":736},{"x":1855,"y":1011},{"x":495,"y":884}],"goal":{"pre":[0,0],"mid":[3,6],"pattern":["장","장","장"]},"sol":{"a":66.96,"p":65}}];
+  const COURSES = [{ id: 150, title: '중수 과정', grade: '중수', aid: 2 }, { id: 200, title: '고수 과정', grade: '고수', aid: 1 }, { id: 300, title: '프로 과정', grade: '프로', aid: 0 }];
+  const AID_TEXT = ['조준 보조 없음 (큐대 방향만)', '예상 경로를 첫 충돌까지만 표시', '예상 경로를 두 번째 충돌까지 표시'];
+  const PKEY = 'jun-carom-progress-v1';
+  let mission = null, tries = 0, usedAnswer = false, verdict = null, keep = null, replayingNow = false, course = 150;
+  let prog = { done: {}, guide: 0 };
   const nodes = [], picks = [], paths = [], labels = [];
   const busy = () => state === 'running' || state === 'paused';
   const snapshot = () => engine.balls.map(b => ({ x: b.x, y: b.y }));
@@ -578,13 +772,16 @@ globalThis.CaromPhysics = CaromPhysics;
     const show = mode === 'shot' && !busy();
     $('aim').setAttribute('visibility', show ? 'visible' : 'hidden');
     if (!show) return null;
-    const pts = predict(), b = engine.balls[cue];
+    const aid = mission ? COURSES.find(c => c.id === mission.course).aid : 2;
+    let pts = predict(); const b = engine.balls[cue];
+    if (aid < 2) pts = pts.slice(0, 2);
+    $('pv1').setAttribute('visibility', aid ? 'inherit' : 'hidden'); $('pv2').setAttribute('visibility', aid ? 'inherit' : 'hidden');
     const seg = (a, c) => `M${a.x.toFixed(2)} ${a.y.toFixed(2)}L${c.x.toFixed(2)} ${c.y.toFixed(2)}`;
     $('pv1').setAttribute('d', seg(pts[0], pts[1]));
     $('pv2').setAttribute('d', pts[2] ? seg(pts[1], pts[2]) : '');
     [['ghost1', pts[1]], ['ghost2', pts[2]]].forEach(([id, p]) => {
       const g = $(id);
-      g.setAttribute('visibility', p ? 'inherit' : 'hidden');
+      g.setAttribute('visibility', p && aid ? 'inherit' : 'hidden');
       if (!p) return;
       g.setAttribute('cx', p.x); g.setAttribute('cy', p.y); g.classList.toggle('stop', p.kind === 'stop');
     });
@@ -593,38 +790,48 @@ globalThis.CaromPhysics = CaromPhysics;
     $('cueTip').setAttribute('d', quad(b, dx, dy, gap, gap + 8, 6, 6));
     $('cueFerrule').setAttribute('d', quad(b, dx, dy, gap + 8, gap + 32, 6, 6.3));
     $('cueShaft').setAttribute('d', quad(b, dx, dy, gap + 32, gap + CUE_LEN, 6.3, 14.5));
-    return pts;
+    return aid ? pts : null;
   }
   function renderLoupe(pts) {
-    const now = performance.now(), dragging = gesture && (gesture.type === 'place' || (gesture.type === 'aim' && gesture.moved));
-    const on = view.loupe && !busy() && (dragging || (mode === 'shot' && (armed || now < loupeUntil)));
-    $('loupe').hidden = !on;
+    const now = performance.now(), lp = $('loupe'), placing = mode === 'place';
+    const dragging = gesture && (gesture.type === 'place' || (gesture.type === 'aim' && gesture.moved));
+    const on = view.loupe && !busy() && (dragging || now < loupeUntil || (!placing && armed));
+    lp.hidden = !on;
     if (!on) return;
     let focus, text;
-    if (mode === 'place') { focus = engine.balls[selected]; text = meta[selected].name; }
+    if (placing) { focus = engine.balls[selected]; text = `${meta[selected].name}\nX ${focus.x.toFixed(1)} · Y ${focus.y.toFixed(1)}`; }
     else if (pts) { focus = pts[1]; text = focus.kind === 'ball' ? '첫 접촉 · ' + meta[focus.other].name : focus.kind === 'wall' ? '첫 접촉 · 쿠션' : '정지 지점'; }
-    else return;
-    const size = 124 / (scale * 2.8);
+    else { lp.hidden = true; return; }
+    // Placement gets a large magnifier (same uniform scale for table and balls, only bigger).
+    const h = stage.clientHeight, px = placing ? Math.round(clamp(h * .78, 150, 300)) : 124, zoom = placing ? 3.4 : 2.8;
+    const size = px / (scale * zoom);
+    lp.style.width = lp.style.height = px + 'px'; lp.style.top = (placing ? Math.max(6, (h - px) / 2) : 8) + 'px';
     $('loupeSvg').setAttribute('viewBox', `${(focus.x - size / 2).toFixed(1)} ${(focus.y - size / 2).toFixed(1)} ${size.toFixed(1)} ${size.toFixed(1)}`);
     $('loupeLabel').textContent = text;
-    $('loupe').className = focus.x > W / 2 ? 'L' : 'R';
+    // Keep the magnifier on the far side of the ball; switch sides only when the ball gets close to it.
+    if (!placing) loupeSide = focus.x > W / 2 ? 'L' : 'R';
+    else if (loupeSide === 'L' && focus.x < W * .46) loupeSide = 'R';
+    else if (loupeSide === 'R' && focus.x > W * .54) loupeSide = 'L';
+    lp.className = loupeSide + (placing ? ' big' : '');
   }
 
   /* ---------- render ---------- */
   function requestRender() { if (renderQueued) return; renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); }
   function render() {
-    const locked = busy(), shot = mode === 'shot';
+    const locked = busy(), shot = mode === 'shot', inMission = !!mission;
+    const trailCue = lastShot && state !== 'ready' ? lastShot.cue : cue;
     engine.balls.forEach((b, i) => {
       const g = nodes[i];
       g.setAttribute('transform', `translate(${b.x.toFixed(2)} ${b.y.toFixed(2)})`);
       g.classList.toggle('selected', i === selected && !locked);
       picks[i].setAttribute('aria-pressed', String(i === selected));
-      picks[i].disabled = locked || (shot && !cueable(i));
+      picks[i].disabled = locked || inMission || (shot && !cueable(i));
       const trail = engine.trails[i];
-      paths[i].setAttribute('d', trail.map((p, j) => `${j ? 'L' : 'M'}${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join('') + `L${b.x.toFixed(2)} ${b.y.toFixed(2)}`);
+      // Only the cue ball's path is drawn; object-ball paths made the table hard to read.
+      paths[i].setAttribute('d', i !== trailCue ? '' : trail.map((p, j) => `${j ? 'L' : 'M'}${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join('') + `L${b.x.toFixed(2)} ${b.y.toFixed(2)}`);
     });
     $('shotMode').setAttribute('aria-pressed', String(shot)); $('placeMode').setAttribute('aria-pressed', String(!shot));
-    $('shotMode').disabled = locked; $('placeMode').disabled = locked;
+    $('shotMode').disabled = locked; $('placeMode').disabled = locked || inMission; $('missionBtn').disabled = locked;
     $('aimBar').hidden = !shot; $('placeBar').hidden = shot;
     $('selTitle').textContent = shot ? '수구 선택' : '옮길 공';
     stage.classList.toggle('shot-mode', shot);
@@ -641,12 +848,14 @@ globalThis.CaromPhysics = CaromPhysics;
     const nextLabel = locked ? (state === 'paused' ? '▶<small>계속</small>' : 'Ⅱ<small>일시정지</small>') : armed ? '발사<small>또는 드래그</small>' : '샷<small>누른 뒤 드래그</small>';
     if (nextLabel !== shootLabel) { shootLabel = nextLabel; shoot.innerHTML = nextLabel; }
     $('armbar').hidden = !(armed && !locked);
+    $('updbar').hidden = !newBuild || armed || locked || !!gesture || (inMission && !!verdict);
     $('cancelArm').classList.toggle('hot', !!(gesture && gesture.overCancel));
     $('armText').textContent = gesture && gesture.fire && gesture.moved ? (gesture.overCancel ? '여기서 손을 떼면 취소' : '미세 조준 중 · 손을 떼면 발사') : '큐대를 드래그해 미세 조준 · 손을 떼면 발사';
     $('replay').disabled = !lastShot || locked; $('restore').disabled = !lastShot;
-    $('undo').disabled = locked || !history.length; $('reset').disabled = locked;
-    for (const id of ['powerMinus', 'powerPlus', 'physicsReset']) $(id).disabled = locked;
-    document.querySelectorAll('#physRows button').forEach(n => n.disabled = locked);
+    $('undo').disabled = locked || inMission || !history.length; $('reset').disabled = locked || inMission;
+    for (const id of ['powerMinus', 'powerPlus']) $(id).disabled = locked;
+    $('physicsReset').disabled = locked || inMission;
+    document.querySelectorAll('#physRows button').forEach(n => n.disabled = locked || inMission);
     $('powerTrack').style.opacity = locked ? .4 : 1;
     $('powerTrack').setAttribute('aria-valuenow', powerPct);
     $('powerValue').textContent = powerPct + '%'; $('launchSpeed').textContent = (speedOf(powerPct) / 1000).toFixed(2) + ' m/s';
@@ -655,6 +864,11 @@ globalThis.CaromPhysics = CaromPhysics;
     document.querySelectorAll('#viewOpts button').forEach(n => n.setAttribute('aria-pressed', String(view[n.dataset.view])));
     document.querySelectorAll('#tabs button').forEach(n => n.setAttribute('aria-pressed', String(n.dataset.tab === tab)));
     document.querySelectorAll('#sheetBody section').forEach(n => n.hidden = n.dataset.pane !== tab);
+    stage.classList.toggle('in-mission', inMission);
+    $('missionBtn').setAttribute('aria-pressed', String(inMission));
+    $('goal').hidden = !inMission;
+    if (inMission) $('goal').innerHTML = `<b>${catName(mission.cat)} ${mission.no}</b> · ${mission.course} 과정 · 시도 ${tries}회<br>${MissionCore.describe(mission)[0]}`;
+    $('mresult').hidden = !(inMission && verdict && state === 'finished');
     $('gridLayer').setAttribute('visibility', view.grid ? 'visible' : 'hidden');
     $('dimensions').setAttribute('visibility', view.dim ? 'visible' : 'hidden');
     $('trails').setAttribute('visibility', view.trail ? 'visible' : 'hidden');
@@ -684,7 +898,7 @@ globalThis.CaromPhysics = CaromPhysics;
     history.push(before); if (history.length > 100) history.shift();
   }
   function choose(i) {
-    if (busy() || (mode === 'shot' && !cueable(i))) return;
+    if (busy() || mission || (mode === 'shot' && !cueable(i))) return;
     selected = i; if (cueable(i)) cue = i;
     toast(meta[i].name + (mode === 'shot' ? ' 수구 선택됨' : ' 선택됨'));
     render();
@@ -696,6 +910,7 @@ globalThis.CaromPhysics = CaromPhysics;
   function place(x, y) {
     if (busy() || mode !== 'place' || !Number.isFinite(x) || !Number.isFinite(y)) return;
     const b = engine.balls[selected], wanted = { x, y };
+    loupeUntil = performance.now() + 2200;
     for (let k = 0; k < 40; k++) {
       x = clamp(x, R, W - R); y = clamp(y, R, H - R);
       for (let j = 0; j < engine.balls.length; j++) {
@@ -717,6 +932,7 @@ globalThis.CaromPhysics = CaromPhysics;
   }
   function setMode(next) {
     if (busy()) return;
+    if (mission && next === 'place') { toast('미션 중에는 배치를 바꿀 수 없습니다.'); return; }
     mode = next; armed = false; if (mode === 'shot') selected = cue;
     toast(mode === 'shot' ? '큐대를 드래그해 조준한 뒤 샷을 누르세요.' : '공을 드래그하거나 좌표를 입력해 배치하세요.');
     render();
@@ -735,6 +951,7 @@ globalThis.CaromPhysics = CaromPhysics;
     const touches = engine.events.filter(e => e.type === 'ball' && (e.i === shotCue || e.j === shotCue)).map(e => meta[e.i === shotCue ? e.j : e.i].name);
     setReport(`${meta[shotCue].name} 샷 완료 · ${engine.time.toFixed(2)}초`, (touches.length ? '수구 접촉 순서: ' + touches.join(' → ') : '수구와 다른 공의 접촉 없음') + ` / 전체 공 충돌 ${engine.ballHits}회 · 전체 쿠션 ${engine.cushionHits}회`);
     toast('샷 완료 · ' + (touches.length ? touches.join(' → ') : '접촉 없음') + ` · 쿠션 ${engine.cushionHits}회`, 4200);
+    if (mission) missionFinish();
     render();
   }
   function frame(timestamp) {
@@ -754,6 +971,7 @@ globalThis.CaromPhysics = CaromPhysics;
   function startShot(replaying = false) {
     if (busy() || (replaying && !lastShot)) return;
     armed = false;
+    replayingNow = replaying;
     if (!replaying) lastShot = { positions: snapshot(), cue, angle: angleDeg, power: powerPct, config: { ...cfg } };
     else { angleDeg = lastShot.angle; powerPct = lastShot.power; cfg = { ...lastShot.config }; }
     selected = cue = lastShot.cue; mode = 'shot'; engine.config = { ...lastShot.config }; engine.setPositions(lastShot.positions);
@@ -771,7 +989,7 @@ globalThis.CaromPhysics = CaromPhysics;
   }
   function restoreShot() {
     if (!lastShot) return;
-    cancelAnimationFrame(raf); releaseWake(); armed = false;
+    cancelAnimationFrame(raf); releaseWake(); armed = false; verdict = null;
     const before = snapshot(); loadPositions(lastShot.positions); remember(before);
     cue = selected = lastShot.cue; angleDeg = lastShot.angle; powerPct = lastShot.power; cfg = { ...lastShot.config }; engine.config = { ...cfg }; mode = 'shot';
     toast('샷 전 배치로 복원했습니다. 방향과 세기를 바꿔 비교해보세요.');
@@ -820,7 +1038,7 @@ globalThis.CaromPhysics = CaromPhysics;
     if (!gesture || gesture.id !== e.pointerId) return;
     const g = gesture; gesture = null;
     try { if (g.node.hasPointerCapture(e.pointerId)) g.node.releasePointerCapture(e.pointerId); } catch (error) { /* ignore */ }
-    if (g.type === 'place') { remember(g.start); render(); return; }
+    if (g.type === 'place') { remember(g.start); loupeUntil = performance.now() + 900; render(); return; }
     const aborted = e.type !== 'pointerup';
     loupeUntil = performance.now() + 900;
     if (g.fire) {
@@ -833,9 +1051,12 @@ globalThis.CaromPhysics = CaromPhysics;
     }
   }
   stage.addEventListener('pointerdown', e => {
+    if (e.target.closest('#updbar')) return;
     if (e.target.closest('#cancelArm')) { e.preventDefault(); disarm('샷 취소 · 조준은 그대로 유지됩니다.'); return; }
+    if (e.target.closest('#mresult')) return;
     if (gesture || busy() || (e.pointerType === 'mouse' && e.button !== 0)) return;
     e.preventDefault();
+    if (mission && state === 'finished') missionRetry();
     const p = point(e);
     if (mode === 'shot') { beginAim(e, stage, armed, { tapBall: armed ? -1 : ballAt(p, true) }); return; }
     const i = ballAt(p, false);
@@ -843,6 +1064,7 @@ globalThis.CaromPhysics = CaromPhysics;
       selected = i; if (cueable(i)) cue = i;
       const b = engine.balls[i];
       gesture = { id: e.pointerId, type: 'place', node: stage, start: snapshot(), dx: p.x - b.x, dy: p.y - b.y };
+      loupeSide = b.x > W / 2 ? 'L' : 'R';
       stage.setPointerCapture(e.pointerId); render();
     } else if (p.x >= 0 && p.x <= W && p.y >= 0 && p.y <= H) {
       const before = snapshot(); place(p.x, p.y); remember(before);
@@ -853,6 +1075,7 @@ globalThis.CaromPhysics = CaromPhysics;
     e.preventDefault();
     if (busy()) { pause(); return; }
     if (gesture || mode !== 'shot') return;
+    if (mission && state === 'finished') missionRetry();
     const justArmed = !armed; armed = true;
     beginAim(e, $('shoot'), true, { fromButton: true, justArmed });
     render();
@@ -904,7 +1127,7 @@ globalThis.CaromPhysics = CaromPhysics;
   $('menu').onclick = () => { $('sheet').hidden = false; render(); };
   $('sheetClose').onclick = () => { $('sheet').hidden = true; };
   $('sheet').addEventListener('pointerdown', e => { if (e.target === $('sheet')) $('sheet').hidden = true; });
-  document.querySelectorAll('#tabs button').forEach(n => n.onclick = () => { tab = n.dataset.tab; $('sheetBody').scrollTop = 0; render(); });
+  document.querySelectorAll('#tabs button').forEach(n => n.onclick = () => { if (n.dataset.tab === 'help') { $('sheet').hidden = true; $('guide').hidden = false; return; } tab = n.dataset.tab; $('sheetBody').scrollTop = 0; render(); });
   document.querySelectorAll('#viewOpts button').forEach(n => n.onclick = () => { const k = n.dataset.view; view[k] = !view[k]; if (k === 'dim') measure(); render(); });
   for (const [k, spec] of Object.entries(PHYS)) {
     const label = document.createElement('label'); label.textContent = spec.label;
@@ -915,14 +1138,109 @@ globalThis.CaromPhysics = CaromPhysics;
     holdable(box.firstChild, () => change(-1)); holdable(box.lastChild, () => change(1));
   }
   $('physicsReset').onclick = () => { if (busy()) return; cfg = { ...DEFAULTS }; engine.config = { ...cfg }; render(); };
-  {
-    // Drag-to-scroll that works in both orientations (native touch scrolling ignores the rotation).
-    const body = $('sheetBody'); let id = null, last = 0;
-    body.addEventListener('pointerdown', e => { if (e.target.closest('button,a')) return; id = e.pointerId; last = local(e, body).y; });
-    body.addEventListener('pointermove', e => { if (id !== e.pointerId) return; const y = local(e, body).y; body.scrollTop -= y - last; last = y; });
+  /* Drag-to-scroll that works in both orientations (native touch scrolling ignores the rotation). */
+  function dragScroll(body) {
+    let id = null, last = 0, moved = 0;
+    body.addEventListener('pointerdown', e => { id = e.pointerId; last = local(e, body).y; moved = 0; });
+    body.addEventListener('pointermove', e => { if (id !== e.pointerId) return; const y = local(e, body).y; moved += Math.abs(y - last); if (moved > 8) body.scrollTop -= y - last; last = y; });
     for (const type of ['pointerup', 'pointercancel', 'pointerleave']) body.addEventListener(type, e => { if (id === e.pointerId) id = null; });
+    body.addEventListener('click', e => { if (moved > 8) { e.stopPropagation(); e.preventDefault(); } moved = 0; }, true);
     body.addEventListener('wheel', e => { body.scrollTop += e.deltaY; }, { passive: true });
   }
+  dragScroll($('sheetBody')); dragScroll($('missionBody'));
+
+  /* ---------- missions ---------- */
+  const catName = key => MissionCore.CATS.find(c => c.key === key).name;
+  const inCourse = id => MISSIONS.filter(m => m.course === id);
+  const doneIn = id => inCourse(id).filter(m => prog.done[m.id]).length;
+  const passMark = id => Math.ceil(inCourse(id).length * .7);
+  function levelOf() {
+    let rank = 0;
+    while (rank < COURSES.length && inCourse(COURSES[rank].id).length && doneIn(COURSES[rank].id) >= passMark(COURSES[rank].id)) rank++;
+    return { rank, name: rank ? COURSES[rank - 1].grade : '하수' };
+  }
+  function loadProg() {
+    try { const saved = JSON.parse(localStorage.getItem(PKEY) || 'null'); if (saved && typeof saved.done === 'object' && saved.done) prog = { done: saved.done, guide: saved.guide ? 1 : 0 }; } catch (error) { /* start fresh */ }
+  }
+  function saveProg() { try { localStorage.setItem(PKEY, JSON.stringify(prog)); } catch (error) { /* progress stays for this session only */ } }
+  function renderMissions() {
+    const level = levelOf();
+    $('levelBadge').textContent = '현재 등급 · ' + level.name;
+    $('courseTabs').innerHTML = COURSES.map((c, i) => `<button data-course="${c.id}" aria-pressed="${c.id === course}">${c.id} ${c.title}${i > level.rank ? ' 🔒' : ''}</button>`).join('');
+    const c = COURSES.find(x => x.id === course), index = COURSES.indexOf(c), list = inCourse(course), done = doneIn(course), need = passMark(course) - done;
+    let html = `<div class="msum"><b>${c.id} ${c.title}</b> · 완료 ${done}/${list.length} · ${need > 0 ? `${need}개 더 완료하면 <b>${c.grade}</b> 승급` : `<b>${c.grade}</b> 과정 수료`}<br>${AID_TEXT[c.aid]} · 물리 설정은 기본값으로 고정됩니다.${mission ? ' <button id="freePlay" class="wide-btn">자유 연습으로 돌아가기</button>' : ''}</div>`;
+    if (index > level.rank) html += `<div class="hint">${COURSES[index - 1].id} ${COURSES[index - 1].title}을 수료하면 열립니다. (${passMark(COURSES[index - 1].id)}개 이상 완료)</div>`;
+    else for (const cat of MissionCore.CATS) {
+      const items = list.filter(m => m.cat === cat.key);
+      if (!items.length) continue;
+      html += `<div class="group">${cat.name}</div><div class="tiles">` + items.map(m => {
+        const stars = prog.done[m.id] || 0;
+        return `<button class="tile${stars ? ' done' : ''}${mission && mission.id === m.id ? ' now' : ''}" data-mission="${m.id}">${m.no}<small>${stars ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '···'}</small></button>`;
+      }).join('') + '</div>';
+    }
+    $('missionBody').innerHTML = html;
+  }
+  function openMissions() { if (busy()) return; armed = false; if (mission) course = mission.course; else course = COURSES[Math.min(levelOf().rank, COURSES.length - 1)].id; renderMissions(); $('missionBody').scrollTop = 0; $('missions').hidden = false; render(); }
+  function startMission(m) {
+    if (busy()) return;
+    if (!mission) keep = { positions: snapshot(), cfg: { ...cfg }, cue, angle: angleDeg, power: powerPct };
+    mission = m; tries = 0; usedAnswer = false; verdict = null; armed = false; history = []; lastShot = null;
+    cfg = { ...DEFAULTS }; engine.config = { ...cfg }; loadPositions(m.balls); mode = 'shot'; selected = cue = 0;
+    // Start with the cue pointing at red ① (a neutral starting aim, not the answer).
+    angleDeg = wrap(Math.atan2(m.balls[0].y - m.balls[1].y, m.balls[1].x - m.balls[0].x) * 180 / Math.PI); powerPct = 45;
+    $('missions').hidden = true; setReport(`미션 · ${catName(m.cat)} ${m.no}`, MissionCore.describe(m)[1]);
+    toast(MissionCore.describe(m)[1], 7000); render();
+  }
+  function exitMission() {
+    if (!mission || busy()) return;
+    mission = null; verdict = null; armed = false; history = []; lastShot = null;
+    cfg = { ...keep.cfg }; engine.config = { ...cfg }; loadPositions(keep.positions); selected = cue = keep.cue; angleDeg = keep.angle; powerPct = keep.power; keep = null;
+    $('missions').hidden = true; setReport('자유 연습', '미션을 마치고 이전 배치로 돌아왔습니다.'); toast('자유 연습으로 돌아왔습니다.'); render();
+  }
+  function missionRetry() { verdict = null; armed = false; loadPositions(mission.balls); engine.config = { ...cfg }; }
+  function missionFinish() {
+    if (replayingNow) { showVerdict(); return; }
+    tries++;
+    const v = MissionCore.judge(mission, { line: MissionCore.timeline(engine.events, 0), trail: engine.trails[0], finals: snapshot() });
+    if (v.ok) {
+      const before = levelOf().rank;
+      v.stars = usedAnswer ? 1 : tries === 1 ? 3 : tries <= 3 ? 2 : 1;
+      prog.done[mission.id] = Math.max(prog.done[mission.id] || 0, v.stars); saveProg();
+      const after = levelOf(); v.levelUp = after.rank > before ? after.name : '';
+    }
+    verdict = v; showVerdict();
+  }
+  function nextMission() {
+    const list = MISSIONS.filter(m => m.course === mission.course), at = list.indexOf(mission);
+    return list.slice(at + 1).concat(list.slice(0, at)).find(m => !prog.done[m.id]) || null;
+  }
+  function showVerdict() {
+    const v = verdict, box = $('mresult');
+    if (!v) return;
+    box.className = 'armbar res ' + (v.ok ? 'win' : 'lose');
+    $('mresultText').textContent = v.ok ? `✔ 성공 ${'★'.repeat(v.stars)}${'☆'.repeat(3 - v.stars)} · ${tries}번째 시도${v.levelUp ? ` · 🎉 ${v.levelUp} 승급!` : ''}` : '✖ ' + MissionCore.reason(mission, v);
+    $('mNext').hidden = !v.ok; $('mRetry').hidden = v.ok;
+    $('mNext').textContent = nextMission() ? '다음 미션' : '미션 목록';
+    $('mAnswer').hidden = v.ok; $('mAnswer').disabled = tries < 3; $('mAnswer').textContent = tries < 3 ? `정답 보기 (${3 - tries}회 더 시도 후)` : '정답 보기';
+  }
+  $('missionBtn').onclick = openMissions;
+  $('missionsClose').onclick = () => { $('missions').hidden = true; };
+  $('missions').addEventListener('pointerdown', e => { if (e.target === $('missions')) $('missions').hidden = true; });
+  $('courseTabs').addEventListener('click', e => { const b = e.target.closest('[data-course]'); if (!b) return; course = +b.dataset.course; renderMissions(); $('missionBody').scrollTop = 0; });
+  $('missionBody').addEventListener('click', e => {
+    if (e.target.closest('#freePlay')) { exitMission(); return; }
+    const b = e.target.closest('[data-mission]'); if (!b) return;
+    const m = MISSIONS.find(x => x.id === b.dataset.mission); if (m) startMission(m);
+  });
+  $('mRetry').onclick = () => { if (busy() || !mission) return; missionRetry(); render(); };
+  $('mNext').onclick = () => { if (busy() || !mission) return; const m = nextMission(); if (m) startMission(m); else { missionRetry(); openMissions(); } };
+  $('mList').onclick = () => { if (busy() || !mission) return; missionRetry(); openMissions(); };
+  $('mAnswer').onclick = () => {
+    if (busy() || !mission || tries < 3) return;
+    usedAnswer = true; missionRetry(); angleDeg = mission.sol.a; powerPct = mission.sol.p;
+    toast('정답 예시를 조준에 맞췄습니다. 샷을 눌러 확인하세요. (별 1개로 기록)', 5000); render();
+  };
+  $('guideClose').onclick = () => { $('guide').hidden = true; if (!prog.guide) { prog.guide = 1; saveProg(); } };
 
   /* ---------- in-app number pad (no system keyboard, works in either orientation) ---------- */
   let pad = null;
@@ -972,7 +1290,7 @@ globalThis.CaromPhysics = CaromPhysics;
 
   /* ---------- keyboard (desktop / external keyboard) ---------- */
   document.addEventListener('keydown', e => {
-    if (pad || !$('sheet').hidden || /BUTTON/.test(e.target.tagName) || gesture || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (pad || !$('sheet').hidden || !$('missions').hidden || !$('guide').hidden || /BUTTON/.test(e.target.tagName) || gesture || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.code === 'Space' && mode === 'shot') { e.preventDefault(); busy() ? pause() : startShot(); return; }
     if (busy()) return;
     if (mode === 'shot' && ['ArrowLeft', 'ArrowRight'].includes(e.key)) { e.preventDefault(); setAngle(angleDeg + (e.key === 'ArrowLeft' ? 1 : -1) * (e.shiftKey ? 5 : .2)); return; }
@@ -983,8 +1301,9 @@ globalThis.CaromPhysics = CaromPhysics;
   /* ---------- persistence: last layout and settings stay on this phone ---------- */
   function queueSave() { clearTimeout(saveTimer); saveTimer = setTimeout(save, 400); }
   function save() {
-    if (busy()) return;
-    try { localStorage.setItem(KEY, JSON.stringify({ v: 1, positions: snapshot(), cue, angle: angleDeg, power: powerPct, cfg, view, stepMm })); } catch (error) { /* storage may be unavailable */ }
+    if (busy() || (mission && state !== 'ready')) return;
+    try { const free = mission ? keep : { positions: snapshot(), cue, angle: angleDeg, power: powerPct, cfg };
+      localStorage.setItem(KEY, JSON.stringify({ v: 1, positions: free.positions, cue: free.cue, angle: free.angle, power: free.power, cfg: free.cfg, view, stepMm })); } catch (error) { /* storage may be unavailable */ }
   }
   function restore() {
     let saved = null;
@@ -1008,11 +1327,38 @@ globalThis.CaromPhysics = CaromPhysics;
   document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
   window.addEventListener('resize', layout); window.addEventListener('orientationchange', () => setTimeout(layout, 120));
   if (window.ResizeObserver) new ResizeObserver(measure).observe(stage);
-  $('appVersion').textContent = '· ' + VERSION;
-  restore(); layout(); render();
+  /* ---------- updates: the newest files load automatically at launch; this covers a session left open ---------- */
+  async function checkUpdate(manual) {
+    if (!UPDATES) { if (manual) toast('이 화면에서는 업데이트 확인을 지원하지 않습니다.'); return; }
+    if (checking) return;
+    checking = true; lastCheck = Date.now();
+    try {
+      const reg = await navigator.serviceWorker.getRegistration(); if (reg) reg.update().catch(() => {});
+      const response = await fetch('index.html', { cache: 'no-store' });
+      const found = response.ok && (await response.text()).match(new RegExp('name="app-' + 'build" content="([^"]+)"'));
+      if (!found) throw new Error('no build id');
+      if (found[1] !== BUILD) { newBuild = found[1]; if (manual) applyUpdate(); else requestRender(); }
+      else if (manual) toast(`최신 버전입니다. (${VERSION})`);
+    } catch (error) { if (manual) toast('업데이트를 확인하지 못했습니다. 인터넷 연결을 확인하세요.', 4000); }
+    checking = false;
+  }
+  function applyUpdate() { if (busy()) return; clearTimeout(saveTimer); save(); toast('새 버전을 불러옵니다…'); setTimeout(() => location.reload(), 250); }
+  $('checkUpdate').onclick = () => checkUpdate(true);
+  $('applyUpdate').onclick = applyUpdate;
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - lastCheck > 60000) checkUpdate(false); });
+  if (UPDATES) setTimeout(() => checkUpdate(false), 4000); else $('checkUpdate').hidden = true;
+  $('appVersion').textContent = `버전 ${VERSION} · ${BUILD}`;
+  restore(); loadProg(); layout(); render();
+  if (!prog.guide) $('guide').hidden = false;
   setTimeout(() => $('toast').classList.add('off'), 4000);
-  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
-  window.__carom = { get engine() { return engine; }, get state() { return state; }, get angle() { return angleDeg; }, get armed() { return armed; }, get prediction() { return predict(); }, get lastShot() { return lastShot; }, get scale() { return scale; } };
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
+  window.__carom = {
+    get engine() { return engine; }, get state() { return state; }, get angle() { return angleDeg; }, get power() { return powerPct; }, get armed() { return armed; },
+    get prediction() { return predict(); }, get lastShot() { return lastShot; }, get scale() { return scale; }, get mission() { return mission; }, get verdict() { return verdict; },
+    get progress() { return prog; }, get level() { return levelOf(); }, missions: MISSIONS,
+    startMission: id => startMission(MISSIONS.find(m => m.id === id)), exitMission, setAim: (a, p) => { angleDeg = wrap(a); powerPct = p; render(); }, shoot: () => startShot(),
+    finishNow() { if (state !== 'running') return; cancelAnimationFrame(raf); try { let n = 0; while (engine.moving() && n++ < 40000) engine.step(DT); } catch (error) { /* reported by finish */ } finish(); }
+  };
 })();
 </script>
 </body></html>
