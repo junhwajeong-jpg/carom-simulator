@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Jun's Carom">
+<meta name="theme-color" content="#101916">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Jun's Carom · 4구 물리 시뮬레이터</title>
+<style>
+:root{color-scheme:dark;--bg:#101916;--panel:#18231f;--line:#304039;--text:#edf3ed;--muted:#99ada1;--lime:#d0ec98;
+--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{position:fixed;inset:0;margin:0;overflow:hidden;background:var(--bg);overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
+body{color:var(--text);font:13px/1.35 system-ui,-apple-system,"Apple SD Gothic Neo","Segoe UI",sans-serif}
+[hidden]{display:none!important}
+button{font:inherit;color:var(--text);background:#24342c;border:1px solid #425448;border-radius:9px;padding:0;margin:0;cursor:pointer;touch-action:none;min-width:0}
+button:active{background:#334b3b}
+button:disabled{opacity:.35}
+button:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+
+/* The whole app is one landscape surface. In a portrait viewport it is rotated
+   90deg by script, so the table always uses the long side of the phone. */
+#app{position:absolute;left:0;top:0;transform-origin:0 0;display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+padding:var(--st) var(--sr) var(--sb) var(--sl);background:var(--bg)}
+#app.rot{--sl:env(safe-area-inset-top,0px);--sr:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-right,0px);--sb:env(safe-area-inset-left,0px)}
+
+.rail{width:80px;display:flex;flex-direction:column;gap:6px;padding:8px 6px;background:var(--panel);min-height:0}
+.rail.left{border-right:1px solid var(--line)}
+.rail.right{border-left:1px solid var(--line)}
+.rail button{height:34px;font-size:11px;flex:none}
+.grow{flex:1;min-height:0}
+.rail-label{font-size:9px;letter-spacing:1px;color:var(--muted);margin-top:4px}
+.seg{display:grid;gap:3px;padding:3px;border:1px solid var(--line);background:#15231b;border-radius:11px}
+.seg button{border:0;background:transparent;height:32px;font-size:12px}
+.seg button[aria-pressed=true]{background:#3b5035;color:var(--lime)}
+.picks{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.rail .pick{height:36px;display:flex;align-items:center;justify-content:center;background:#1c2922}
+.pick[aria-pressed=true]{border-color:var(--lime);background:#31432e}
+.swatch{width:17px;height:17px;border-radius:50%;box-shadow:inset -2px -3px 4px #0005;display:grid;place-items:center;font-size:9px;font-weight:700;color:#40100e}
+
+.pinfo{text-align:center;line-height:1.2}
+.pinfo span{display:block;font-size:9px;letter-spacing:1px;color:var(--muted)}
+.pinfo strong{display:block;font-size:19px;color:var(--lime);font-variant-numeric:tabular-nums}
+.pinfo small{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:5px;flex:none}
+.rail .row2 button{height:30px;font-size:16px}
+.ptrack{flex:1;min-height:48px;position:relative;border-radius:10px;background:#111d17;border:1px solid #405146;touch-action:none;overflow:hidden}
+#powerFill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(#d0ec98,#6f9a55);opacity:.5}
+#powerThumb{position:absolute;left:3px;right:3px;height:6px;margin-bottom:-3px;border-radius:3px;background:var(--lime)}
+.rail .shoot{height:58px;font-size:18px;font-weight:700;background:var(--lime);color:#1a3019;border-color:var(--lime);line-height:1.1}
+.shoot small{display:block;font-size:9px;font-weight:500;opacity:.75}
+.shoot:active{background:#e0f4b4}
+.shoot.armed{background:#f2b84b;border-color:#f2b84b;color:#33210a;animation:pulse 1s ease-in-out infinite}
+.shoot.busy{background:#24342c;color:var(--text);border-color:#425448}
+@keyframes pulse{50%{box-shadow:0 0 0 5px #f2b84b44}}
+
+.center{display:flex;flex-direction:column;min-width:0;min-height:0}
+.strip{height:42px;flex:none;display:flex;align-items:center;gap:8px;padding:0 8px}
+.state-tag{color:var(--lime);font-size:10px;border:1px solid #3f5842;border-radius:20px;padding:4px 8px;white-space:nowrap;flex:none}
+.bar{display:flex;align-items:center;gap:4px;flex:none}
+.bar button{height:34px;min-width:40px;padding:0 6px;font-size:12px;font-variant-numeric:tabular-nums}
+.bar .readout{min-width:84px;background:#111d17;border-color:#405146;font-size:14px;font-weight:600}
+.bar .readout.wide{min-width:168px;font-size:12px;font-weight:500}
+.mini-tel{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;text-align:right}
+
+.stage{flex:1;min-height:0;position:relative;touch-action:none;background:radial-gradient(ellipse at 50% 40%,#24362a,#141f19);overflow:hidden}
+.stage.shot-mode{cursor:crosshair}
+#board{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ns{vector-effect:non-scaling-stroke}
+.focus-ring{opacity:0;fill:none;stroke:#e0edb9;stroke-width:1.4px;stroke-dasharray:4 3}
+.ball.selected .focus-ring{opacity:.85}
+#trails{opacity:.8}
+#trails path{fill:none;stroke-width:1.8px;stroke-linecap:round;stroke-linejoin:round}
+.pv{fill:none;stroke:#f3f6c9;stroke-linecap:round;stroke-linejoin:round}
+#pv1{stroke-width:1.4px;stroke-dasharray:5 4}
+#pv2{stroke-width:1.2px;stroke-dasharray:2 4;opacity:.8}
+.ghost{fill:#e7edb1;fill-opacity:.1;stroke:#f3f6c9;stroke-width:1.1px}
+#ghost2{fill-opacity:.04;stroke-dasharray:3 2.5}
+.ghost.stop{fill-opacity:.28;stroke-dasharray:none}
+.dim-label{fill:#a8bcaa;letter-spacing:1px}
+.diamond{fill:#b1b88a;opacity:.8}
+#gridLayer{fill:none;stroke:#e2f0ce;stroke-width:.6px;opacity:.22}
+
+.armbar{position:absolute;top:6px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:#1b1508e6;border:1px solid #f2b84b;border-radius:22px;padding:4px 4px 4px 12px;font-size:11px;color:#f6d99a;white-space:nowrap;z-index:3}
+.armbar button{height:32px;padding:0 14px;border-radius:16px;background:#3a2c12;border-color:#8a6a2a;color:#f6d99a;font-size:12px}
+.armbar button.hot{background:#b3402e;border-color:#e2705c;color:#fff}
+.toast{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);background:#0d1512e6;border:1px solid var(--line);border-radius:18px;padding:5px 12px;font-size:11px;color:var(--lime);pointer-events:none;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis;transition:opacity .25s;z-index:2}
+.toast.off{opacity:0}
+#loupe{position:absolute;top:8px;width:124px;height:124px;border-radius:50%;overflow:hidden;border:2px solid #dfe8c4;box-shadow:0 4px 16px #0009;pointer-events:none;background:#141f19;z-index:2}
+#loupe.L{left:8px}#loupe.R{right:8px}
+#loupe svg{width:100%;height:100%;display:block}
+/* custom properties inherit into <use>, so names are hidden only inside the magnifier */
+#loupeSvg{--label-opacity:0}
+.ball-label{opacity:var(--label-opacity,1)}
+#loupe b{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:9px;font-weight:500;color:#dfe8c4;text-shadow:0 1px 2px #000}
+
+.overlay{position:absolute;inset:0;background:#060b09b8;z-index:10;display:grid;place-items:center;padding:calc(var(--st) + 8px) calc(var(--sr) + 8px) calc(var(--sb) + 8px) calc(var(--sl) + 8px)}
+.sheetbox{width:min(760px,100%);height:100%;background:var(--panel);border:1px solid #57704b;border-radius:14px;display:flex;flex-direction:column;overflow:hidden}
+.sheetbox header{display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid var(--line);flex:none}
+.tabs{display:flex;gap:4px;flex:1;min-width:0}
+.tabs button{height:34px;padding:0 12px;font-size:12px;background:transparent;border-color:transparent;white-space:nowrap}
+.tabs button[aria-pressed=true]{background:#3b5035;color:var(--lime)}
+#sheetClose{width:38px;height:34px;font-size:15px}
+.sheetbody{flex:1;min-height:0;overflow:hidden;padding:12px 14px;touch-action:none}
+.telemetry{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:#101e16;border:1px solid #2d4232;border-radius:10px;padding:10px 12px}
+.telemetry span{display:block;font-size:10px;color:var(--muted)}
+.telemetry strong{font-size:14px;font-weight:500;font-variant-numeric:tabular-nums}
+.telemetry .wide{grid-column:1/-1;border-top:1px solid #2d4232;padding-top:8px}
+.shot-report{border-left:2px solid #9ab674;padding:3px 12px;margin:12px 0}
+.shot-report strong{display:block;font-size:13px;margin-bottom:3px}
+.shot-report span{font-size:12px;color:var(--muted)}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.opts button{height:40px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px}
+.opts button[aria-pressed=true]{border-color:var(--lime);background:#31432e;color:#e6f4ce}
+.opts button[aria-pressed=true]::before{content:"✓"}
+.group{font-size:10px;letter-spacing:1px;color:var(--muted);margin:14px 0 7px}
+.group:first-child{margin-top:0}
+.phys{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center}
+.phys label{font-size:12px;color:#b5c9b6}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:44px;height:36px;font-size:17px}
+.stepper strong{width:62px;text-align:center;color:var(--lime);font-variant-numeric:tabular-nums;font-size:14px}
+.hint{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5}
+.info{font-size:11px;color:var(--muted);line-height:1.6}
+.info a{color:#a6baa5}
+.info p{margin:0 0 8px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:10px;padding:9px 0;margin-bottom:10px}
+.stat{padding:0 12px;border-right:1px solid var(--line)}
+.stat:last-child{border:0}
+.stat span{display:block;color:var(--muted);font-size:10px}
+.stat strong{font-size:13px;font-weight:600;white-space:nowrap}
+.wide-btn{height:38px;padding:0 16px;font-size:12px}
+
+.padbox{background:var(--panel);border:1px solid #57704b;border-radius:14px;padding:10px;display:grid;grid-template-columns:auto auto;gap:10px;align-items:center}
+.padfields{display:grid;gap:8px;min-width:170px}
+.padfields button{height:50px;padding:0 12px;text-align:left;background:#111d17;border-color:#405146;font-size:11px;color:var(--muted)}
+.padfields button strong{display:block;font-size:19px;color:var(--text);font-variant-numeric:tabular-nums;font-weight:600}
+.padfields button[aria-pressed=true]{border-color:var(--lime)}
+.padmsg{font-size:11px;color:#f2b84b;min-height:15px}
+.keys{display:grid;grid-template-columns:repeat(4,56px);gap:6px}
+.keys button{height:46px;font-size:17px}
+.keys .ok{background:var(--lime);color:#1a3019;border-color:var(--lime);font-weight:700;font-size:14px}
+.keys .sub{font-size:12px}
+</style>
+</head>
+<body>
+<div id="app">
+<nav class="rail left" aria-label="모드와 공 선택">
+  <div class="seg"><button id="shotMode" aria-pressed="true">↗ 샷</button><button id="placeMode" aria-pressed="false">✥ 배치</button></div>
+  <div class="rail-label" id="selTitle">수구 선택</div>
+  <div class="picks" id="picks"></div>
+  <span class="grow"></span>
+  <button id="undo" disabled>↶ 되돌리기</button>
+  <button id="menu">☰ 메뉴</button>
+</nav>
+
+<main class="center">
+  <div class="strip">
+    <span id="engineState" class="state-tag">조준 중</span>
+    <div id="aimBar" class="bar" aria-label="방향 미세 조정 (오른쪽 0° · 위쪽 90°)">
+      <button data-da="-1" aria-label="1도 감소">−1</button><button data-da="-0.1" aria-label="0.1도 감소">−0.1</button>
+      <button id="angleBtn" class="readout" aria-label="샷 방향 각도 입력">20.00°</button>
+      <button data-da="0.1" aria-label="0.1도 증가">+0.1</button><button data-da="1" aria-label="1도 증가">+1</button>
+    </div>
+    <div id="placeBar" class="bar" hidden aria-label="공 좌표와 이동">
+      <button id="coordBtn" class="readout wide" aria-label="공 중심 좌표 입력">X 612.0 · Y 612.0 mm</button>
+      <button data-dx="-1" data-dy="0" aria-label="왼쪽으로 이동">←</button><button data-dx="0" data-dy="-1" aria-label="위로 이동">↑</button><button data-dx="0" data-dy="1" aria-label="아래로 이동">↓</button><button data-dx="1" data-dy="0" aria-label="오른쪽으로 이동">→</button>
+      <button id="stepBtn" aria-label="이동 단위 변경">5mm</button>
+    </div>
+    <span class="grow"></span>
+    <span id="mini" class="mini-tel">0.00 s · 공 0 · 쿠션 0</span>
+  </div>
+  <div class="stage shot-mode" id="stage">
+    <svg id="board" viewBox="-150 -150 2748 1524" preserveAspectRatio="xMidYMid meet" role="img" aria-label="경기면 2448 × 1224mm, 공 지름 65.5mm">
+      <defs>
+        <linearGradient id="wood" x2="0" y2="1"><stop stop-color="#6d5137"/><stop offset=".35" stop-color="#382b21"/><stop offset="1" stop-color="#241f19"/></linearGradient>
+        <linearGradient id="rail" x2="0" y2="1"><stop stop-color="#426b4c"/><stop offset="1" stop-color="#1a462f"/></linearGradient>
+        <radialGradient id="felt"><stop stop-color="#337653"/><stop offset="1" stop-color="#256244"/></radialGradient>
+        <radialGradient id="white" cx="32%" cy="25%" r="74%"><stop stop-color="#fff"/><stop offset=".5" stop-color="#f7f5e7"/><stop offset="1" stop-color="#b1baaa"/></radialGradient>
+        <radialGradient id="red" cx="30%" cy="25%" r="74%"><stop stop-color="#ffb3a5"/><stop offset=".25" stop-color="#f34e3e"/><stop offset=".65" stop-color="#d31e26"/><stop offset="1" stop-color="#831821"/></radialGradient>
+        <radialGradient id="yellow" cx="30%" cy="25%" r="74%"><stop stop-color="#fff5b6"/><stop offset=".35" stop-color="#ffda47"/><stop offset=".7" stop-color="#efb912"/><stop offset="1" stop-color="#ad7d15"/></radialGradient>
+        <linearGradient id="cueWood" x2="1" y2="0"><stop stop-color="#e9d3a6"/><stop offset=".55" stop-color="#caa56b"/><stop offset="1" stop-color="#5a3620"/></linearGradient>
+        <filter id="shadow" x="-50%" y="-50%" width="220%" height="230%"><feDropShadow dx="3" dy="7" stdDeviation="4" flood-opacity=".5"/></filter>
+      </defs>
+      <g id="scene">
+        <g id="dimensions" visibility="hidden"><path class="ns" d="M0 -148V-186M2448 -148V-186M0 -170H2448M-148 0H-186M-148 1224H-186M-170 0V1224" fill="none" stroke="#77917b" stroke-width="1"/><text class="dim-label" x="1224" y="-186" text-anchor="middle">2,448 mm</text><text class="dim-label" transform="translate(-186 612) rotate(-90)" text-anchor="middle">1,224 mm</text></g>
+        <rect x="-135" y="-120" width="2718" height="1494" rx="48" fill="#000" opacity=".3"/>
+        <rect x="-130" y="-130" width="2708" height="1484" rx="42" fill="url(#wood)" stroke="#806a4c" stroke-width="3"/>
+        <rect x="-74" y="-74" width="2596" height="1372" rx="7" fill="url(#rail)" stroke="#142b1e" stroke-width="5"/>
+        <path d="M-74 -74L0 0M2522 -74L2448 0M-74 1298L0 1224M2522 1298L2448 1224" stroke="#173f2a" stroke-width="4"/>
+        <rect x="0" y="0" width="2448" height="1224" fill="url(#felt)"/>
+        <rect x="0" y="0" width="2448" height="1224" fill="none" stroke="#102e21" stroke-width="4"/>
+        <path id="gridLayer" class="ns" visibility="hidden"/>
+        <g id="diamonds"></g>
+        <g fill="#e2f0d0" opacity=".2"><circle cx="612" cy="612" r="4"/><circle cx="1224" cy="612" r="4"/><circle cx="1836" cy="612" r="4"/></g>
+        <text x="1224" y="1327" text-anchor="middle" fill="#acaa82" font-size="26" letter-spacing="10">J U N ' S   C A R O M</text>
+        <g id="trails"></g>
+        <g id="aim">
+          <path id="pv1" class="pv ns"/><path id="pv2" class="pv ns"/>
+          <circle id="ghost1" class="ghost ns" r="32.75"/><circle id="ghost2" class="ghost ns" r="32.75"/>
+          <g id="cueStick"><path id="cueShaft" fill="url(#cueWood)" stroke="#2a1a10" stroke-width="1.5"/><path id="cueFerrule" fill="#f4f1e4"/><path id="cueTip" fill="#3f7fb5"/></g>
+        </g>
+        <g id="balls"></g>
+      </g>
+    </svg>
+    <div id="armbar" class="armbar" hidden><span id="armText">큐대를 드래그해 미세 조준 · 손을 떼면 발사</span><button id="cancelArm">✕ 취소</button></div>
+    <div id="loupe" class="L" hidden><svg id="loupeSvg" viewBox="0 0 200 200" aria-hidden="true"><use href="#scene"/></svg><b id="loupeLabel">첫 접촉</b></div>
+    <div id="toast" class="toast" role="status" aria-live="polite">큐대를 드래그해 조준하세요.</div>
+  </div>
+</main>
+
+<aside class="rail right" aria-label="샷 세기와 실행">
+  <div class="pinfo"><span>샷 세기</span><strong id="powerValue">45%</strong><small id="launchSpeed">1.73 m/s</small></div>
+  <div class="row2"><button id="powerMinus" aria-label="세기 1% 감소">−</button><button id="powerPlus" aria-label="세기 1% 증가">+</button></div>
+  <div id="powerTrack" class="ptrack" role="slider" tabindex="0" aria-label="샷 세기" aria-valuemin="1" aria-valuemax="100" aria-valuenow="45"><div id="powerFill"></div><div id="powerThumb"></div></div>
+  <button id="replay" disabled>↻ 다시 보기</button>
+  <button id="restore" disabled>↶ 샷 전 복원</button>
+  <button id="shoot" class="shoot">샷<small>누른 뒤 드래그</small></button>
+</aside>
+
+<div id="sheet" class="overlay" hidden>
+  <div class="sheetbox" role="dialog" aria-label="메뉴">
+    <header><div class="tabs" id="tabs"><button data-tab="result">샷 결과</button><button data-tab="view">표시 · 배치</button><button data-tab="phys">물리 설정</button><button data-tab="info">정보</button></div><button id="sheetClose" aria-label="닫기">✕</button></header>
+    <div class="sheetbody" id="sheetBody">
+      <section data-pane="result">
+        <div class="telemetry"><div><span>시뮬레이션 시간</span><strong id="elapsed">0.00 s</strong></div><div><span>수구 속도</span><strong id="liveSpeed">0.00 m/s</strong></div><div><span>공 충돌 / 쿠션</span><strong id="hitCount">0 / 0</strong></div><div><span>수구 이동 거리</span><strong id="travelDistance">0.00 m</strong></div><div class="wide"><span>최근 쿠션 각도 · 법선 기준</span><strong id="reboundAngles">—</strong></div></div>
+        <div class="shot-report"><strong id="shotReportTitle">무회전 샷 연습</strong><span id="shotReport">점선은 수구의 예상 경로(두 번째 충돌까지), 색 실선은 실제 계산된 이동 궤적입니다.</span></div>
+      </section>
+      <section data-pane="view" hidden>
+        <div class="group">화면 표시</div>
+        <div class="opts" id="viewOpts"><button data-view="trail">궤적</button><button data-view="grid">격자</button><button data-view="dim">치수</button><button data-view="label">공 이름</button><button data-view="loupe">돋보기</button></div>
+        <div class="group">배치</div>
+        <button id="reset" class="wide-btn">초기 배치로 되돌리기</button>
+        <div class="hint">배치 모드: 공을 끌거나, 공을 선택한 뒤 빈 곳을 누르세요. 좌표 버튼으로 mm 단위 직접 입력이 가능합니다.</div>
+      </section>
+      <section data-pane="phys" hidden>
+        <div class="phys" id="physRows"></div>
+        <div class="hint">동일 질량의 원형 강체 · 충격량 기반 충돌 · 연속 충돌 검출 · 240Hz 고정 계산<br>기본값은 연습용 가정값이며 실측값이 아닙니다. 반발계수 1은 탄성 충돌입니다. 감속 계수가 높을수록 빨리 멈춥니다. 쿠션의 접선 방향 속도는 유지합니다.</div>
+        <button id="physicsReset" class="wide-btn" style="margin-top:10px">물리 설정 기본값</button>
+      </section>
+      <section data-pane="info" hidden>
+        <div class="stats"><div class="stat"><span>경기면 · 쿠션 안쪽</span><strong>2,448 × 1,224 mm</strong></div><div class="stat"><span>모든 공의 지름</span><strong>65.5 mm · 4구용</strong></div><div class="stat"><span>크기 비율</span><strong>1 : 37.37</strong></div></div>
+        <div class="info">
+          <p id="scaleInfo">비율 계산 중</p>
+          <p>물리 모델: 무회전 2차원 강체 근사이며, 회전·밀어치기·끌어치기·쿠션의 스핀 전달은 반영하지 않습니다. 실제 테이블에 맞춰 보정하지 않았으므로 연습용으로 사용하세요. 경기면·공·큐는 같은 축척이며 테두리 디자인은 예시입니다.</p>
+          <p>모델 참고: <a href="https://mechanicsmap.psu.edu/websites/11_impulse_momentum_particle/11-3_surface_collisions/surface_collisions.html" target="_blank" rel="noopener noreferrer">Penn State · 쿠션 반발계수</a> · <a href="https://openstax.org/books/college-physics-2e/pages/8-6-collisions-of-point-masses-in-two-dimensions" target="_blank" rel="noopener noreferrer">OpenStax · 2차원 충돌</a> · 규격 참고: <a href="https://kr.object.ncloudstorage.com/kbfdiv/2025_kbf_division_manual.pdf.pdf" target="_blank" rel="noopener noreferrer">대한당구연맹 2025 디비전리그 매뉴얼</a></p>
+          <p>아이폰 설치: Safari에서 열고 공유 버튼 → ‘홈 화면에 추가’. 화면 회전 잠금이 켜져 있어도 가로 화면으로 표시됩니다. <span id="appVersion"></span></p>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div id="pad" class="overlay" hidden>
+  <div class="padbox" role="dialog" aria-label="숫자 입력">
+    <div><div class="padfields" id="padFields"></div><div class="padmsg" id="padMsg"></div></div>
+    <div class="keys" id="keys"></div>
+  </div>
+</div>
+</div>
+
+<script id="physics-engine">
+/* Units: mm, seconds. Equal-mass, non-spinning disks. Effective cloth drag
+   approximates speed loss; these defaults are illustrative, not calibrated. */
+class CaromPhysics {
+  constructor(positions, config = {}) {
+    this.width = 2448; this.height = 1224; this.radius = 32.75;
+    this.config = { ballRestitution: .96, cushionRestitution: .84, friction: .012, ...config };
+    this.setPositions(positions);
+  }
+  setPositions(positions) {
+    this.balls = positions.map(b => ({ x: b.x, y: b.y, vx: 0, vy: 0 }));
+    this.time = 0; this.ballHits = 0; this.cushionHits = 0;
+    this.distance = this.balls.map(() => 0); this.events = []; this.lastRebound = null;
+    this.trails = this.balls.map(b => [{ x: b.x, y: b.y }]);
+  }
+  launch(index, degrees, speed) {
+    const a = degrees * Math.PI / 180;
+    this.balls[index].vx = Math.cos(a) * speed;
+    this.balls[index].vy = -Math.sin(a) * speed;
+  }
+  moving() { return this.balls.some(b => b.vx !== 0 || b.vy !== 0); }
+  record(force = false) {
+    this.balls.forEach((b, i) => {
+      const path = this.trails[i], p = path[path.length - 1];
+      if (Math.hypot(p.x - b.x, p.y - b.y) <= (force ? .00001 : 4)) return;
+      const point = { x: b.x, y: b.y };
+      // Keep straight segments compact, preserving every deflection vertex.
+      if (path.length >= 2) {
+        const prev = path[path.length - 2], ax = p.x - prev.x, ay = p.y - prev.y;
+        const bx = b.x - p.x, by = b.y - p.y;
+        if (Math.abs(ax * by - ay * bx) <= 1e-8 * Math.hypot(ax, ay) * Math.hypot(bx, by) && ax * bx + ay * by >= 0) {
+          path[path.length - 1] = point;
+          return;
+        }
+      }
+      path.push(point);
+    });
+  }
+  advance(dt) {
+    if (dt <= 0) return;
+    this.balls.forEach((b, i) => {
+      b.x += b.vx * dt; b.y += b.vy * dt;
+      this.distance[i] += Math.hypot(b.vx, b.vy) * dt;
+    });
+    this.record();
+  }
+  drag(dt) {
+    const loss = this.config.friction * 9810 * dt;
+    for (const b of this.balls) {
+      const speed = Math.hypot(b.vx, b.vy);
+      if (speed === 0) continue;
+      const next = Math.max(0, speed - loss), ratio = next / speed;
+      b.vx *= ratio; b.vy *= ratio;
+    }
+  }
+  pairTime(a, b, limit) {
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const vx = b.vx - a.vx, vy = b.vy - a.vy;
+    const approach = dx * vx + dy * vy;
+    if (approach >= -1e-7 * Math.hypot(dx, dy)) return null;
+    const c = dx * dx + dy * dy - (2 * this.radius) ** 2;
+    if (c <= 1e-6) return 0;
+    const v2 = vx * vx + vy * vy;
+    const discriminant = approach * approach - v2 * c;
+    if (discriminant < 0 || v2 < 1e-14) return null;
+    // Stable quadratic root for the first contact, including grazing impacts.
+    const t = c / (-approach + Math.sqrt(discriminant));
+    return t >= -1e-9 && t <= limit + 1e-9 ? Math.max(0, t) : null;
+  }
+  nextEvents(limit) {
+    let first = limit + 1; let events = [];
+    const add = (t, e) => {
+      if (t === null || t < -1e-9 || t > limit + 1e-9) return;
+      t = Math.max(0, Math.min(limit, t));
+      if (t < first - 1e-9) { first = t; events = [e]; }
+      else if (Math.abs(t - first) <= 1e-9) events.push(e);
+    };
+    this.balls.forEach((b, i) => {
+      const r = this.radius;
+      if (b.vx < -1e-7) add((r - b.x) / b.vx, { type: 'wall', i, axis: 'x', side: -1 });
+      if (b.vx > 1e-7) add((this.width - r - b.x) / b.vx, { type: 'wall', i, axis: 'x', side: 1 });
+      if (b.vy < -1e-7) add((r - b.y) / b.vy, { type: 'wall', i, axis: 'y', side: -1 });
+      if (b.vy > 1e-7) add((this.height - r - b.y) / b.vy, { type: 'wall', i, axis: 'y', side: 1 });
+      for (let j = i + 1; j < this.balls.length; j++) {
+        add(this.pairTime(b, this.balls[j], limit), { type: 'ball', i, j });
+      }
+    });
+    return events.length ? { time: first, events } : null;
+  }
+  resolvePair(i, j) {
+    const a = this.balls[i], b = this.balls[j];
+    const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy);
+    const nx = dist > 1e-10 ? dx / dist : 1, ny = dist > 1e-10 ? dy / dist : 0;
+    const normalSpeed = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+    if (normalSpeed >= -1e-7) return false;
+    // Equal masses: impulse/m = -(1+e) * relativeNormalSpeed / 2.
+    const impulse = -(1 + this.config.ballRestitution) * normalSpeed / 2;
+    a.vx -= impulse * nx; a.vy -= impulse * ny;
+    b.vx += impulse * nx; b.vy += impulse * ny;
+    this.ballHits++;
+    this.events.push({ type: 'ball', i, j, time: this.time });
+    return true;
+  }
+  resolveWall(e) {
+    const b = this.balls[e.i], key = e.axis === 'x' ? 'vx' : 'vy';
+    if (b[key] * e.side <= 1e-7) return false;
+    const vn = Math.abs(b[key]), vt = Math.abs(b[key === 'vx' ? 'vy' : 'vx']);
+    b[e.axis] = e.side < 0 ? this.radius : (e.axis === 'x' ? this.width : this.height) - this.radius;
+    b[key] *= -this.config.cushionRestitution;
+    // Tangential velocity is preserved: no cushion spin/throw is modeled.
+    this.lastRebound = {
+      incoming: Math.atan2(vt, vn) * 180 / Math.PI,
+      outgoing: Math.atan2(vt, Math.abs(b[key])) * 180 / Math.PI,
+      i: e.i
+    };
+    this.cushionHits++;
+    this.events.push({ ...e, time: this.time });
+    return true;
+  }
+  correctPositions() {
+    const r = this.radius, diameter = 2 * r;
+    // Iterative geometric correction is only for round-off / simultaneous contacts.
+    for (let k = 0; k < 24; k++) {
+      let error = 0;
+      for (let i = 0; i < this.balls.length; i++) {
+        const a = this.balls[i];
+        a.x = Math.max(r, Math.min(this.width - r, a.x));
+        a.y = Math.max(r, Math.min(this.height - r, a.y));
+        for (let j = i + 1; j < this.balls.length; j++) {
+          const b = this.balls[j], dx = b.x - a.x, dy = b.y - a.y;
+          const dist = Math.hypot(dx, dy), overlap = diameter - dist;
+          if (overlap <= 1e-8) continue;
+          error = Math.max(error, overlap);
+          const nx = dist > 1e-10 ? dx / dist : 1, ny = dist > 1e-10 ? dy / dist : 0;
+          a.x -= nx * overlap / 2; a.y -= ny * overlap / 2;
+          b.x += nx * overlap / 2; b.y += ny * overlap / 2;
+        }
+      }
+      if (error < 1e-7) break;
+    }
+    for (const b of this.balls) {
+      b.x = Math.max(r, Math.min(this.width - r, b.x));
+      b.y = Math.max(r, Math.min(this.height - r, b.y));
+    }
+  }
+  step(dt = 1 / 240) {
+    this.drag(dt / 2);
+    let remaining = dt, iterations = 0;
+    while (remaining > 1e-10) {
+      if (++iterations > 256) throw new Error('동시 충돌 계산 한도를 초과했습니다. 배치를 조금 바꿔 다시 시도하세요.');
+      const next = this.nextEvents(remaining);
+      if (!next) { this.advance(remaining); this.time += remaining; remaining = 0; break; }
+      this.advance(next.time); this.time += next.time; remaining -= next.time;
+      this.record(true);
+      for (const e of next.events) {
+        if (e.type === 'ball') this.resolvePair(e.i, e.j);
+        else this.resolveWall(e);
+      }
+      this.correctPositions();
+    }
+    this.drag(dt / 2);
+    // Negligible residual velocity is removed to terminate a shot cleanly.
+    for (const b of this.balls) if (Math.hypot(b.vx, b.vy) < 1) { b.vx = 0; b.vy = 0; }
+    if (!this.moving()) this.record(true);
+  }
+}
+globalThis.CaromPhysics = CaromPhysics;
+
+</script>
+<script id="app-script">
+(() => {
+  'use strict';
+  const VERSION = 'mobile 1.0';
+  const W = 2448, H = 1224, D = 65.5, R = D / 2, NS = 'http://www.w3.org/2000/svg', DT = 1 / 240;
+  const KEY = 'jun-carom-mobile-v1', SLOP = 7, FINE = 0.2, CUE_LEN = 1400;
+  const $ = id => document.getElementById(id);
+  const app = $('app'), svg = $('board'), stage = $('stage');
+  const meta = [
+    { name: '흰공', mark: '', fill: 'white', color: '#f4f4e7', x: 612, y: 612 },
+    { name: '적구 ①', mark: '1', fill: 'red', color: '#ef4940', x: 1836, y: 612 },
+    { name: '적구 ②', mark: '2', fill: 'red', color: '#ef4940', x: 1224, y: 360 },
+    { name: '노란공', mark: '', fill: 'yellow', color: '#f4c628', x: 1224, y: 864 }
+  ];
+  const DEFAULTS = { ballRestitution: .96, cushionRestitution: .84, friction: .012 };
+  const PHYS = {
+    ballRestitution: { min: .85, max: 1, step: .01, dp: 2, label: '공 반발계수' },
+    cushionRestitution: { min: .5, max: 1, step: .01, dp: 2, label: '쿠션 반발계수' },
+    friction: { min: .003, max: .04, step: .001, dp: 3, label: '천 감속 계수 μ' }
+  };
+  const VIEWBOX = { tight: [-150, -150, 2748, 1524], dim: [-220, -225, 2888, 1654] };
+
+  let cfg = { ...DEFAULTS };
+  let view = { trail: true, grid: false, dim: false, label: true, loupe: true };
+  let engine = new CaromPhysics(meta, cfg);
+  let mode = 'shot', state = 'ready', selected = 0, cue = 0, angleDeg = 20, powerPct = 45, stepMm = 5;
+  let armed = false, gesture = null, lastShot = null, history = [], raf = 0, previousTime = null, accumulator = 0;
+  let rotated = false, scale = 1, vb = VIEWBOX.tight, prediction = null, predictionKey = '';
+  let loupeUntil = 0, loupeTimer = 0, shootLabel = '', renderQueued = false, saveTimer = 0, toastTimer = 0, wakeLock = null, tab = 'result';
+  let report = { title: '무회전 샷 연습', text: '점선은 수구의 예상 경로(두 번째 충돌까지), 색 실선은 실제 계산된 이동 궤적입니다.' };
+
+  const nodes = [], picks = [], paths = [], labels = [];
+  const busy = () => state === 'running' || state === 'paused';
+  const snapshot = () => engine.balls.map(b => ({ x: b.x, y: b.y }));
+  const speedOf = p => 150 + 35 * p;
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const wrap = a => { a = ((a % 360) + 360) % 360; a = Math.round(a * 100) / 100; return a >= 360 ? 0 : a; };
+  const cueable = i => i === 0 || i === 3;
+
+  /* ---------- scene ---------- */
+  function el(tag, attrs, parent) {
+    const n = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  for (let i = 1; i < 8; i++) for (const y of [-100, H + 100]) el('path', { d: `M${i * 306} ${y - 7}l7 7-7 7-7-7z`, class: 'diamond' }, $('diamonds'));
+  for (let i = 1; i < 4; i++) for (const x of [-100, W + 100]) el('path', { d: `M${x} ${i * 306 - 7}l7 7-7 7-7-7z`, class: 'diamond' }, $('diamonds'));
+  {
+    let d = '';
+    for (let x = 153; x < W; x += 153) d += `M${x} 0V${H}`;
+    for (let y = 153; y < H; y += 153) d += `M0 ${y}H${W}`;
+    $('gridLayer').setAttribute('d', d);
+  }
+  meta.forEach((m, i) => {
+    paths.push(el('path', { stroke: m.color, class: 'ns' }, $('trails')));
+    const g = el('g', { class: 'ball' }, $('balls'));
+    el('circle', { r: R + 12, class: 'focus-ring ns' }, g);
+    el('circle', { r: R, fill: `url(#${m.fill})`, filter: 'url(#shadow)' }, g);
+    el('circle', { cx: -10, cy: -14, r: 6, fill: '#fff', opacity: '.45' }, g);
+    const label = el('text', { 'text-anchor': 'middle', fill: '#e0e9d7', 'font-family': 'system-ui,sans-serif', class: 'ball-label' }, g);
+    label.textContent = m.name; labels.push(label); nodes.push(g);
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'pick';
+    btn.setAttribute('aria-label', m.name);
+    btn.innerHTML = `<span class="swatch" style="background:${m.color}">${m.mark}</span>`;
+    btn.onclick = () => choose(i); $('picks').appendChild(btn); picks.push(btn);
+  });
+
+  /* ---------- layout: landscape surface, rotated when the viewport is portrait ---------- */
+  function layout() {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    rotated = vh > vw;
+    app.style.width = (rotated ? vh : vw) + 'px';
+    app.style.height = (rotated ? vw : vh) + 'px';
+    app.style.transform = rotated ? `translateX(${vw}px) rotate(90deg)` : 'none';
+    app.classList.toggle('rot', rotated);
+    measure();
+  }
+  function measure() {
+    vb = view.dim ? VIEWBOX.dim : VIEWBOX.tight;
+    svg.setAttribute('viewBox', vb.join(' '));
+    const w = stage.clientWidth, h = stage.clientHeight;
+    if (!w || !h) return;
+    scale = Math.min(w / vb[2], h / vb[3]);
+    // Text is sized in screen pixels; geometry (table, balls, cue) stays in millimetres.
+    const labelSize = 9.5 / scale;
+    labels.forEach(t => { t.setAttribute('font-size', labelSize.toFixed(1)); t.setAttribute('y', (R + labelSize * 1.15).toFixed(1)); });
+    document.querySelectorAll('.dim-label').forEach(t => t.setAttribute('font-size', (10 / scale).toFixed(1)));
+    $('scaleInfo').textContent = `현재 화면: 경기면·공·큐 동일 축척 1mm = ${scale.toFixed(3)}px · 공 지름 ${(D * scale).toFixed(1)}px · 경기면 ${(W * scale).toFixed(0)} × ${(H * scale).toFixed(0)}px`;
+    requestRender();
+  }
+  /* Pointer position in an element's own (unrotated) box. */
+  function local(e, node) {
+    const r = node.getBoundingClientRect();
+    return rotated ? { x: e.clientY - r.top, y: r.right - e.clientX, w: r.height, h: r.width }
+                   : { x: e.clientX - r.left, y: e.clientY - r.top, w: r.width, h: r.height };
+  }
+  function point(e) {
+    const l = local(e, stage), s = Math.min(l.w / vb[2], l.h / vb[3]);
+    return { x: vb[0] + (l.x - (l.w - vb[2] * s) / 2) / s, y: vb[1] + (l.y - (l.h - vb[3] * s) / 2) / s };
+  }
+  function ballAt(p, onlyCue) {
+    const reach = Math.max(R + 5, 22 / scale); let best = -1, bestDist = reach;
+    engine.balls.forEach((b, i) => {
+      if (onlyCue && !cueable(i)) return;
+      const dist = Math.hypot(p.x - b.x, p.y - b.y);
+      if (dist <= bestDist) { best = i; bestDist = dist; }
+    });
+    return best;
+  }
+
+  /* ---------- prediction: the real engine, run ahead to the cue ball's 2nd collision ---------- */
+  function predict() {
+    const key = JSON.stringify([engine.balls.map(b => [b.x, b.y]), cue, angleDeg, powerPct, cfg]);
+    if (key === predictionKey) return prediction;
+    const sim = new CaromPhysics(snapshot(), { ...cfg }), c = cue, hits = [];
+    const pair = sim.resolvePair, wall = sim.resolveWall;
+    sim.resolvePair = function (i, j) {
+      const ok = pair.call(this, i, j);
+      if (ok && (i === c || j === c) && hits.length < 2) hits.push({ kind: 'ball', other: i === c ? j : i, x: this.balls[c].x, y: this.balls[c].y });
+      return ok;
+    };
+    sim.resolveWall = function (e) {
+      const ok = wall.call(this, e);
+      if (ok && e.i === c && hits.length < 2) hits.push({ kind: 'wall', x: this.balls[c].x, y: this.balls[c].y });
+      return ok;
+    };
+    sim.launch(c, angleDeg, speedOf(powerPct));
+    let guard = 0;
+    try { while (sim.moving() && hits.length < 2 && guard++ < 9600) sim.step(DT); } catch (error) { /* shown when the shot is run */ }
+    const points = [{ kind: 'start', x: engine.balls[c].x, y: engine.balls[c].y }, ...hits];
+    if (hits.length < 2) points.push({ kind: 'stop', x: sim.balls[c].x, y: sim.balls[c].y });
+    predictionKey = key; prediction = points;
+    return points;
+  }
+  function quad(b, dx, dy, t0, t1, w0, w1) {
+    const nx = -dy, ny = dx, p = (t, w, s) => `${(b.x - dx * t + nx * w * s).toFixed(1)} ${(b.y - dy * t + ny * w * s).toFixed(1)}`;
+    return `M${p(t0, w0, 1)}L${p(t1, w1, 1)}L${p(t1, w1, -1)}L${p(t0, w0, -1)}Z`;
+  }
+  function renderAim() {
+    const show = mode === 'shot' && !busy();
+    $('aim').setAttribute('visibility', show ? 'visible' : 'hidden');
+    if (!show) return null;
+    const pts = predict(), b = engine.balls[cue];
+    const seg = (a, c) => `M${a.x.toFixed(2)} ${a.y.toFixed(2)}L${c.x.toFixed(2)} ${c.y.toFixed(2)}`;
+    $('pv1').setAttribute('d', seg(pts[0], pts[1]));
+    $('pv2').setAttribute('d', pts[2] ? seg(pts[1], pts[2]) : '');
+    [['ghost1', pts[1]], ['ghost2', pts[2]]].forEach(([id, p]) => {
+      const g = $(id);
+      g.setAttribute('visibility', p ? 'inherit' : 'hidden');
+      if (!p) return;
+      g.setAttribute('cx', p.x); g.setAttribute('cy', p.y); g.classList.toggle('stop', p.kind === 'stop');
+    });
+    // Cue drawn to scale (1.4 m, 12 mm tip) behind the cue ball; the gap shows the power.
+    const a = angleDeg * Math.PI / 180, dx = Math.cos(a), dy = -Math.sin(a), gap = R + 14 + powerPct * (armed ? 1.5 : .6);
+    $('cueTip').setAttribute('d', quad(b, dx, dy, gap, gap + 8, 6, 6));
+    $('cueFerrule').setAttribute('d', quad(b, dx, dy, gap + 8, gap + 32, 6, 6.3));
+    $('cueShaft').setAttribute('d', quad(b, dx, dy, gap + 32, gap + CUE_LEN, 6.3, 14.5));
+    return pts;
+  }
+  function renderLoupe(pts) {
+    const now = performance.now(), dragging = gesture && (gesture.type === 'place' || (gesture.type === 'aim' && gesture.moved));
+    const on = view.loupe && !busy() && (dragging || (mode === 'shot' && (armed || now < loupeUntil)));
+    $('loupe').hidden = !on;
+    if (!on) return;
+    let focus, text;
+    if (mode === 'place') { focus = engine.balls[selected]; text = meta[selected].name; }
+    else if (pts) { focus = pts[1]; text = focus.kind === 'ball' ? '첫 접촉 · ' + meta[focus.other].name : focus.kind === 'wall' ? '첫 접촉 · 쿠션' : '정지 지점'; }
+    else return;
+    const size = 124 / (scale * 2.8);
+    $('loupeSvg').setAttribute('viewBox', `${(focus.x - size / 2).toFixed(1)} ${(focus.y - size / 2).toFixed(1)} ${size.toFixed(1)} ${size.toFixed(1)}`);
+    $('loupeLabel').textContent = text;
+    $('loupe').className = focus.x > W / 2 ? 'L' : 'R';
+  }
+
+  /* ---------- render ---------- */
+  function requestRender() { if (renderQueued) return; renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); }
+  function render() {
+    const locked = busy(), shot = mode === 'shot';
+    engine.balls.forEach((b, i) => {
+      const g = nodes[i];
+      g.setAttribute('transform', `translate(${b.x.toFixed(2)} ${b.y.toFixed(2)})`);
+      g.classList.toggle('selected', i === selected && !locked);
+      picks[i].setAttribute('aria-pressed', String(i === selected));
+      picks[i].disabled = locked || (shot && !cueable(i));
+      const trail = engine.trails[i];
+      paths[i].setAttribute('d', trail.map((p, j) => `${j ? 'L' : 'M'}${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join('') + `L${b.x.toFixed(2)} ${b.y.toFixed(2)}`);
+    });
+    $('shotMode').setAttribute('aria-pressed', String(shot)); $('placeMode').setAttribute('aria-pressed', String(!shot));
+    $('shotMode').disabled = locked; $('placeMode').disabled = locked;
+    $('aimBar').hidden = !shot; $('placeBar').hidden = shot;
+    $('selTitle').textContent = shot ? '수구 선택' : '옮길 공';
+    stage.classList.toggle('shot-mode', shot);
+    $('engineState').textContent = armed ? '● 장전됨' : { ready: shot ? '조준 중' : '배치 중', running: '● 계산 중', paused: 'Ⅱ 일시정지', finished: '샷 완료' }[state];
+    for (const n of document.querySelectorAll('#aimBar button, #placeBar button')) n.disabled = locked;
+    $('angleBtn').textContent = angleDeg.toFixed(2) + '°';
+    const sel = engine.balls[selected];
+    $('coordBtn').textContent = `X ${sel.x.toFixed(1)} · Y ${sel.y.toFixed(1)} mm`;
+    $('stepBtn').textContent = stepMm + 'mm';
+
+    const shoot = $('shoot');
+    shoot.classList.toggle('armed', armed && !locked); shoot.classList.toggle('busy', locked);
+    shoot.disabled = !shot;
+    const nextLabel = locked ? (state === 'paused' ? '▶<small>계속</small>' : 'Ⅱ<small>일시정지</small>') : armed ? '발사<small>또는 드래그</small>' : '샷<small>누른 뒤 드래그</small>';
+    if (nextLabel !== shootLabel) { shootLabel = nextLabel; shoot.innerHTML = nextLabel; }
+    $('armbar').hidden = !(armed && !locked);
+    $('cancelArm').classList.toggle('hot', !!(gesture && gesture.overCancel));
+    $('armText').textContent = gesture && gesture.fire && gesture.moved ? (gesture.overCancel ? '여기서 손을 떼면 취소' : '미세 조준 중 · 손을 떼면 발사') : '큐대를 드래그해 미세 조준 · 손을 떼면 발사';
+    $('replay').disabled = !lastShot || locked; $('restore').disabled = !lastShot;
+    $('undo').disabled = locked || !history.length; $('reset').disabled = locked;
+    for (const id of ['powerMinus', 'powerPlus', 'physicsReset']) $(id).disabled = locked;
+    document.querySelectorAll('#physRows button').forEach(n => n.disabled = locked);
+    $('powerTrack').style.opacity = locked ? .4 : 1;
+    $('powerTrack').setAttribute('aria-valuenow', powerPct);
+    $('powerValue').textContent = powerPct + '%'; $('launchSpeed').textContent = (speedOf(powerPct) / 1000).toFixed(2) + ' m/s';
+    $('powerFill').style.height = powerPct + '%'; $('powerThumb').style.bottom = powerPct + '%';
+    for (const k of Object.keys(PHYS)) $(k + 'Value').textContent = cfg[k].toFixed(PHYS[k].dp);
+    document.querySelectorAll('#viewOpts button').forEach(n => n.setAttribute('aria-pressed', String(view[n.dataset.view])));
+    document.querySelectorAll('#tabs button').forEach(n => n.setAttribute('aria-pressed', String(n.dataset.tab === tab)));
+    document.querySelectorAll('#sheetBody section').forEach(n => n.hidden = n.dataset.pane !== tab);
+    $('gridLayer').setAttribute('visibility', view.grid ? 'visible' : 'hidden');
+    $('dimensions').setAttribute('visibility', view.dim ? 'visible' : 'hidden');
+    $('trails').setAttribute('visibility', view.trail ? 'visible' : 'hidden');
+    labels.forEach(t => t.setAttribute('visibility', view.label ? 'inherit' : 'hidden'));
+
+    const tracked = lastShot && state !== 'ready' ? lastShot.cue : cue, ball = engine.balls[tracked];
+    const live = (Math.hypot(ball.vx, ball.vy) / 1000).toFixed(2) + ' m/s';
+    $('elapsed').textContent = engine.time.toFixed(2) + ' s'; $('liveSpeed').textContent = live;
+    $('hitCount').textContent = engine.ballHits + ' / ' + engine.cushionHits;
+    $('travelDistance').textContent = (engine.distance[tracked] / 1000).toFixed(2) + ' m';
+    $('reboundAngles').textContent = engine.lastRebound ? `입사 ${engine.lastRebound.incoming.toFixed(1)}° → 반사 ${engine.lastRebound.outgoing.toFixed(1)}°` : '—';
+    $('mini').textContent = `${locked ? live + ' · ' : ''}${engine.time.toFixed(2)} s · 공 ${engine.ballHits} · 쿠션 ${engine.cushionHits}`;
+    $('shotReportTitle').textContent = report.title; $('shotReport').textContent = report.text;
+    renderLoupe(renderAim());
+    clearTimeout(loupeTimer); if (performance.now() < loupeUntil) loupeTimer = setTimeout(requestRender, loupeUntil - performance.now() + 20);
+    queueSave();
+  }
+  function toast(text, hold = 2600) {
+    const t = $('toast'); t.textContent = text; t.classList.remove('off');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.add('off'), hold);
+  }
+  function setReport(title, text) { report = { title, text }; }
+
+  /* ---------- state changes (same rules as the web version) ---------- */
+  function remember(before) {
+    if (JSON.stringify(before) === JSON.stringify(snapshot())) return;
+    history.push(before); if (history.length > 100) history.shift();
+  }
+  function choose(i) {
+    if (busy() || (mode === 'shot' && !cueable(i))) return;
+    selected = i; if (cueable(i)) cue = i;
+    toast(meta[i].name + (mode === 'shot' ? ' 수구 선택됨' : ' 선택됨'));
+    render();
+  }
+  function loadPositions(positions) { engine.setPositions(positions); state = 'ready'; }
+  function valid(x, y, idx) {
+    return x >= R - .0001 && x <= W - R + .0001 && y >= R - .0001 && y <= H - R + .0001 && engine.balls.every((b, j) => j === idx || Math.hypot(x - b.x, y - b.y) >= D - .0001);
+  }
+  function place(x, y) {
+    if (busy() || mode !== 'place' || !Number.isFinite(x) || !Number.isFinite(y)) return;
+    const b = engine.balls[selected], wanted = { x, y };
+    for (let k = 0; k < 40; k++) {
+      x = clamp(x, R, W - R); y = clamp(y, R, H - R);
+      for (let j = 0; j < engine.balls.length; j++) {
+        if (j === selected) continue;
+        const o = engine.balls[j], dx = x - o.x, dy = y - o.y, dist = Math.hypot(dx, dy);
+        if (dist < D) {
+          const a = dist > 1e-8 ? Math.atan2(dy, dx) : Math.atan2(b.y - o.y, b.x - o.x);
+          x = o.x + Math.cos(a) * D; y = o.y + Math.sin(a) * D;
+        }
+      }
+      if (valid(x, y, selected)) break;
+    }
+    if (valid(x, y, selected)) {
+      const s = snapshot(); s[selected] = { x, y }; loadPositions(s);
+      if (Math.hypot(x - wanted.x, y - wanted.y) > .05) toast('쿠션 또는 다른 공에 맞춰 위치를 조정했습니다.');
+      setReport('배치 변경됨', '샷 모드로 전환한 뒤 방향과 세기를 정하세요.');
+    } else toast('공이 겹칩니다. 조금 옆으로 옮겨주세요.');
+    requestRender();
+  }
+  function setMode(next) {
+    if (busy()) return;
+    mode = next; armed = false; if (mode === 'shot') selected = cue;
+    toast(mode === 'shot' ? '큐대를 드래그해 조준한 뒤 샷을 누르세요.' : '공을 드래그하거나 좌표를 입력해 배치하세요.');
+    render();
+  }
+  function setAngle(value) { angleDeg = wrap(value); loupeUntil = performance.now() + 1600; requestRender(); }
+  function setPower(value) { if (busy()) return; powerPct = clamp(Math.round(value), 1, 100); requestRender(); }
+  function nudge(dx, dy, amount) {
+    if (busy() || mode !== 'place') return;
+    const before = snapshot(), b = engine.balls[selected]; place(b.x + dx * amount, b.y + dy * amount); remember(before);
+  }
+
+  /* ---------- shot ---------- */
+  function finish() {
+    state = 'finished'; engine.record(true); remember(lastShot.positions); releaseWake();
+    const shotCue = lastShot.cue;
+    const touches = engine.events.filter(e => e.type === 'ball' && (e.i === shotCue || e.j === shotCue)).map(e => meta[e.i === shotCue ? e.j : e.i].name);
+    setReport(`${meta[shotCue].name} 샷 완료 · ${engine.time.toFixed(2)}초`, (touches.length ? '수구 접촉 순서: ' + touches.join(' → ') : '수구와 다른 공의 접촉 없음') + ` / 전체 공 충돌 ${engine.ballHits}회 · 전체 쿠션 ${engine.cushionHits}회`);
+    toast('샷 완료 · ' + (touches.length ? touches.join(' → ') : '접촉 없음') + ` · 쿠션 ${engine.cushionHits}회`, 4200);
+    render();
+  }
+  function frame(timestamp) {
+    if (state !== 'running') return;
+    if (previousTime === null) previousTime = timestamp;
+    accumulator += Math.min((timestamp - previousTime) / 1000, .25); previousTime = timestamp;
+    try {
+      while (accumulator >= DT && state === 'running') {
+        engine.step(DT); accumulator -= DT;
+        if (!engine.moving()) { finish(); break; }
+      }
+    } catch (error) {
+      state = 'paused'; toast(error.message + ' 복원 버튼으로 돌아갈 수 있습니다.', 6000); render(); return;
+    }
+    render(); if (state === 'running') raf = requestAnimationFrame(frame);
+  }
+  function startShot(replaying = false) {
+    if (busy() || (replaying && !lastShot)) return;
+    armed = false;
+    if (!replaying) lastShot = { positions: snapshot(), cue, angle: angleDeg, power: powerPct, config: { ...cfg } };
+    else { angleDeg = lastShot.angle; powerPct = lastShot.power; cfg = { ...lastShot.config }; }
+    selected = cue = lastShot.cue; mode = 'shot'; engine.config = { ...lastShot.config }; engine.setPositions(lastShot.positions);
+    engine.launch(cue, lastShot.angle, speedOf(lastShot.power));
+    state = 'running'; previousTime = null; accumulator = 0; requestWake();
+    setReport(replaying ? '직전 샷 다시 보기' : '샷 진행 중', `${meta[cue].name} · 방향 ${lastShot.angle.toFixed(2)}° · 세기 ${lastShot.power}% · 무회전`);
+    toast(`${meta[cue].name} · ${lastShot.angle.toFixed(2)}° · ${lastShot.power}%`);
+    render(); raf = requestAnimationFrame(frame);
+  }
+  function pause() {
+    if (!busy()) return;
+    if (state === 'running') { state = 'paused'; cancelAnimationFrame(raf); releaseWake(); toast('일시정지됨 · 계속 또는 복원을 누르세요.'); }
+    else { state = 'running'; previousTime = null; requestWake(); raf = requestAnimationFrame(frame); }
+    render();
+  }
+  function restoreShot() {
+    if (!lastShot) return;
+    cancelAnimationFrame(raf); releaseWake(); armed = false;
+    const before = snapshot(); loadPositions(lastShot.positions); remember(before);
+    cue = selected = lastShot.cue; angleDeg = lastShot.angle; powerPct = lastShot.power; cfg = { ...lastShot.config }; engine.config = { ...cfg }; mode = 'shot';
+    toast('샷 전 배치로 복원했습니다. 방향과 세기를 바꿔 비교해보세요.');
+    setReport('샷 전 배치 복원', '동일한 배치에서 다른 샷을 시도할 수 있습니다.');
+    render();
+  }
+  function arm() { if (busy() || mode !== 'shot') return; armed = true; render(); }
+  function disarm(message) { armed = false; if (message) toast(message); render(); }
+  async function requestWake() { try { if (navigator.wakeLock && !wakeLock) wakeLock = await navigator.wakeLock.request('screen'); } catch (error) { wakeLock = null; } }
+  function releaseWake() { try { if (wakeLock) wakeLock.release(); } catch (error) { /* ignore */ } wakeLock = null; }
+
+  /* ---------- gestures ---------- */
+  function cueAngleOf(p) {
+    const b = engine.balls[cue];
+    if (Math.hypot(p.x - b.x, p.y - b.y) < R * 1.3) return null;
+    return Math.atan2(b.y - p.y, p.x - b.x) * 180 / Math.PI;
+  }
+  function overCancel(e) {
+    if ($('armbar').hidden) return false;
+    const r = $('cancelArm').getBoundingClientRect(), m = 6;
+    return e.clientX >= r.left - m && e.clientX <= r.right + m && e.clientY >= r.top - m && e.clientY <= r.bottom + m;
+  }
+  /* "Grab and turn": the cue rotates by the angle the finger sweeps around the cue ball,
+     so there is no jump on touch-down and the finger never has to cover the target. */
+  function beginAim(e, node, fire, extra) {
+    gesture = { id: e.pointerId, type: 'aim', node, fire, gain: fire ? FINE : 1, sx: e.clientX, sy: e.clientY, moved: false, last: null, value: angleDeg, overCancel: false, ...extra };
+    node.setPointerCapture(e.pointerId);
+  }
+  function onMove(e) {
+    if (!gesture || gesture.id !== e.pointerId || busy()) return;
+    const g = gesture, p = point(e);
+    if (g.type === 'place') { place(p.x - g.dx, p.y - g.dy); return; }
+    if (!g.moved) {
+      if (Math.hypot(e.clientX - g.sx, e.clientY - g.sy) < SLOP) return;
+      g.moved = true; g.last = cueAngleOf(p);
+    }
+    const a = cueAngleOf(p);
+    if (a !== null) {
+      if (g.last !== null) { const delta = ((a - g.last + 540) % 360) - 180; g.value += delta * g.gain; angleDeg = wrap(g.value); }
+      g.last = a;
+    }
+    if (g.fire) g.overCancel = overCancel(e);
+    requestRender();
+  }
+  function onEnd(e) {
+    if (!gesture || gesture.id !== e.pointerId) return;
+    const g = gesture; gesture = null;
+    try { if (g.node.hasPointerCapture(e.pointerId)) g.node.releasePointerCapture(e.pointerId); } catch (error) { /* ignore */ }
+    if (g.type === 'place') { remember(g.start); render(); return; }
+    const aborted = e.type !== 'pointerup';
+    loupeUntil = performance.now() + 900;
+    if (g.fire) {
+      if (aborted) render();
+      else if (g.moved) { if (overCancel(e)) disarm('샷 취소 · 조준은 그대로 유지됩니다.'); else startShot(); }
+      else if (g.fromButton && !g.justArmed) startShot();           // second tap on the armed button
+      else { if (g.justArmed) toast('장전됨 · 큐대를 드래그하고 손을 떼면 발사됩니다.', 3600); render(); }
+    } else {
+      if (!aborted && !g.moved && g.tapBall >= 0) choose(g.tapBall); else render();
+    }
+  }
+  stage.addEventListener('pointerdown', e => {
+    if (e.target.closest('#cancelArm')) { e.preventDefault(); disarm('샷 취소 · 조준은 그대로 유지됩니다.'); return; }
+    if (gesture || busy() || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    e.preventDefault();
+    const p = point(e);
+    if (mode === 'shot') { beginAim(e, stage, armed, { tapBall: armed ? -1 : ballAt(p, true) }); return; }
+    const i = ballAt(p, false);
+    if (i >= 0) {
+      selected = i; if (cueable(i)) cue = i;
+      const b = engine.balls[i];
+      gesture = { id: e.pointerId, type: 'place', node: stage, start: snapshot(), dx: p.x - b.x, dy: p.y - b.y };
+      stage.setPointerCapture(e.pointerId); render();
+    } else if (p.x >= 0 && p.x <= W && p.y >= 0 && p.y <= H) {
+      const before = snapshot(); place(p.x, p.y); remember(before);
+    }
+  });
+  $('shoot').addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+    if (busy()) { pause(); return; }
+    if (gesture || mode !== 'shot') return;
+    const justArmed = !armed; armed = true;
+    beginAim(e, $('shoot'), true, { fromButton: true, justArmed });
+    render();
+  });
+  $('shoot').addEventListener('click', e => { if (e.detail !== 0) return; if (busy()) pause(); else if (!armed) arm(); else startShot(); });
+  for (const node of [stage, $('shoot')]) {
+    node.addEventListener('pointermove', onMove);
+    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) node.addEventListener(type, onEnd);
+  }
+
+  /* Hold-to-repeat for small step buttons. */
+  function holdable(node, action) {
+    let timer = 0, interval = 0;
+    const stop = () => { clearTimeout(timer); clearInterval(interval); };
+    node.addEventListener('pointerdown', e => {
+      if (node.disabled || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      e.preventDefault(); stop(); action();
+      timer = setTimeout(() => { interval = setInterval(() => { if (node.disabled) stop(); else action(); }, 70); }, 380);
+    });
+    for (const type of ['pointerup', 'pointercancel', 'pointerleave']) node.addEventListener(type, stop);
+    node.addEventListener('click', e => { if (e.detail === 0 && !node.disabled) action(); });
+  }
+  document.querySelectorAll('[data-da]').forEach(n => holdable(n, () => { if (!busy()) setAngle(angleDeg + +n.dataset.da); }));
+  document.querySelectorAll('[data-dx]').forEach(n => holdable(n, () => nudge(+n.dataset.dx, +n.dataset.dy, stepMm)));
+  holdable($('powerMinus'), () => setPower(powerPct - 1)); holdable($('powerPlus'), () => setPower(powerPct + 1));
+  {
+    const track = $('powerTrack'); let id = null;
+    const apply = e => { const l = local(e, track); setPower(1 + 99 * (1 - clamp((l.y - 6) / (l.h - 12), 0, 1))); };
+    track.addEventListener('pointerdown', e => { if (busy()) return; e.preventDefault(); id = e.pointerId; track.setPointerCapture(id); apply(e); });
+    track.addEventListener('pointermove', e => { if (id === e.pointerId && !busy()) apply(e); });
+    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) track.addEventListener(type, e => { if (id === e.pointerId) id = null; });
+    track.addEventListener('keydown', e => { if (e.key === 'ArrowUp' || e.key === 'ArrowRight') setPower(powerPct + 1); else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') setPower(powerPct - 1); else return; e.preventDefault(); });
+  }
+
+  /* ---------- buttons, menu ---------- */
+  $('shotMode').onclick = () => setMode('shot'); $('placeMode').onclick = () => setMode('place');
+  $('replay').onclick = () => startShot(true); $('restore').onclick = restoreShot;
+  $('stepBtn').onclick = () => { stepMm = { 1: 5, 5: 10, 10: 1 }[stepMm] || 5; render(); };
+  $('undo').onclick = () => {
+    if (busy() || !history.length) return;
+    armed = false; loadPositions(history.pop()); toast('이전 배치로 되돌렸습니다.');
+    setReport('배치 되돌림', '방향과 세기를 조절해 다시 시도하세요.'); render();
+  };
+  $('reset').onclick = () => {
+    if (busy()) return;
+    const before = snapshot(); loadPositions(meta); remember(before); selected = cue = 0; armed = false;
+    toast('처음 배치로 돌아왔습니다.'); setReport('초기 배치', '공 배치 모드에서 원하는 형태로 변경할 수 있습니다.'); $('sheet').hidden = true; render();
+  };
+  $('menu').onclick = () => { $('sheet').hidden = false; render(); };
+  $('sheetClose').onclick = () => { $('sheet').hidden = true; };
+  $('sheet').addEventListener('pointerdown', e => { if (e.target === $('sheet')) $('sheet').hidden = true; });
+  document.querySelectorAll('#tabs button').forEach(n => n.onclick = () => { tab = n.dataset.tab; $('sheetBody').scrollTop = 0; render(); });
+  document.querySelectorAll('#viewOpts button').forEach(n => n.onclick = () => { const k = n.dataset.view; view[k] = !view[k]; if (k === 'dim') measure(); render(); });
+  for (const [k, spec] of Object.entries(PHYS)) {
+    const label = document.createElement('label'); label.textContent = spec.label;
+    const box = document.createElement('div'); box.className = 'stepper';
+    box.innerHTML = `<button type="button" aria-label="${spec.label} 감소">−</button><strong id="${k}Value"></strong><button type="button" aria-label="${spec.label} 증가">+</button>`;
+    $('physRows').append(label, box);
+    const change = dir => { if (busy()) return; cfg[k] = +clamp(cfg[k] + dir * spec.step, spec.min, spec.max).toFixed(spec.dp); engine.config = { ...cfg }; requestRender(); };
+    holdable(box.firstChild, () => change(-1)); holdable(box.lastChild, () => change(1));
+  }
+  $('physicsReset').onclick = () => { if (busy()) return; cfg = { ...DEFAULTS }; engine.config = { ...cfg }; render(); };
+  {
+    // Drag-to-scroll that works in both orientations (native touch scrolling ignores the rotation).
+    const body = $('sheetBody'); let id = null, last = 0;
+    body.addEventListener('pointerdown', e => { if (e.target.closest('button,a')) return; id = e.pointerId; last = local(e, body).y; });
+    body.addEventListener('pointermove', e => { if (id !== e.pointerId) return; const y = local(e, body).y; body.scrollTop -= y - last; last = y; });
+    for (const type of ['pointerup', 'pointercancel', 'pointerleave']) body.addEventListener(type, e => { if (id === e.pointerId) id = null; });
+    body.addEventListener('wheel', e => { body.scrollTop += e.deltaY; }, { passive: true });
+  }
+
+  /* ---------- in-app number pad (no system keyboard, works in either orientation) ---------- */
+  let pad = null;
+  function openPad(fields, apply) {
+    pad = { fields: fields.map(f => ({ ...f, text: String(f.value), fresh: true })), active: 0, apply };
+    $('padMsg').textContent = ''; $('pad').hidden = false; renderPad();
+  }
+  function renderPad() {
+    $('padFields').innerHTML = '';
+    pad.fields.forEach((f, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-pressed', String(i === pad.active));
+      b.innerHTML = `${f.label}<strong>${f.text || '0'} <small>${f.unit}</small></strong>`;
+      b.onclick = () => { pad.active = i; pad.fields[i].fresh = true; renderPad(); };
+      $('padFields').appendChild(b);
+    });
+  }
+  function padKey(k) {
+    const f = pad.fields[pad.active];
+    if (k === '취소') { $('pad').hidden = true; pad = null; return; }
+    if (k === '확인') {
+      const values = pad.fields.map(x => parseFloat(x.text));
+      const bad = pad.fields.findIndex((x, i) => !Number.isFinite(values[i]) || values[i] < x.min || values[i] > x.max);
+      if (bad >= 0) { const x = pad.fields[bad]; pad.active = bad; $('padMsg').textContent = `${x.label}: ${x.min} ~ ${x.max} ${x.unit}`; renderPad(); return; }
+      const apply = pad.apply; $('pad').hidden = true; pad = null; apply(values); return;
+    }
+    if (k === '⌫') { f.text = f.fresh ? '' : f.text.slice(0, -1); f.fresh = false; }
+    else if (k === 'C') { f.text = ''; f.fresh = false; }
+    else {
+      if (f.fresh) { f.text = ''; f.fresh = false; }
+      if (k === '.' && f.text.includes('.')) return;
+      if (f.text.length < 8) f.text += k;
+    }
+    $('padMsg').textContent = ''; renderPad();
+  }
+  ['7', '8', '9', '⌫', '4', '5', '6', 'C', '1', '2', '3', '취소', '0', '.', '확인'].forEach(k => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = k;
+    if (k === '확인') { b.className = 'ok'; b.style.gridColumn = 'span 2'; } else if (k === '취소') b.className = 'sub';
+    b.onclick = () => padKey(k); $('keys').appendChild(b);
+  });
+  $('angleBtn').onclick = () => { if (busy()) return; openPad([{ label: '샷 방향 (오른쪽 0° · 위쪽 90°)', unit: '°', value: angleDeg, min: 0, max: 360 }], v => setAngle(v[0])); };
+  $('coordBtn').onclick = () => {
+    if (busy()) return;
+    const b = engine.balls[selected];
+    openPad([{ label: `${meta[selected].name} X · 왼쪽 쿠션에서`, unit: 'mm', value: +b.x.toFixed(2), min: R, max: W - R }, { label: `${meta[selected].name} Y · 위쪽 쿠션에서`, unit: 'mm', value: +b.y.toFixed(2), min: R, max: H - R }],
+      v => { const before = snapshot(); place(v[0], v[1]); remember(before); });
+  };
+
+  /* ---------- keyboard (desktop / external keyboard) ---------- */
+  document.addEventListener('keydown', e => {
+    if (pad || !$('sheet').hidden || /BUTTON/.test(e.target.tagName) || gesture || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.code === 'Space' && mode === 'shot') { e.preventDefault(); busy() ? pause() : startShot(); return; }
+    if (busy()) return;
+    if (mode === 'shot' && ['ArrowLeft', 'ArrowRight'].includes(e.key)) { e.preventDefault(); setAngle(angleDeg + (e.key === 'ArrowLeft' ? 1 : -1) * (e.shiftKey ? 5 : .2)); return; }
+    const directions = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+    if (mode === 'place' && directions[e.key]) { e.preventDefault(); nudge(...directions[e.key], e.shiftKey ? 10 : 1); }
+  });
+
+  /* ---------- persistence: last layout and settings stay on this phone ---------- */
+  function queueSave() { clearTimeout(saveTimer); saveTimer = setTimeout(save, 400); }
+  function save() {
+    if (busy()) return;
+    try { localStorage.setItem(KEY, JSON.stringify({ v: 1, positions: snapshot(), cue, angle: angleDeg, power: powerPct, cfg, view, stepMm })); } catch (error) { /* storage may be unavailable */ }
+  }
+  function restore() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (error) { saved = null; }
+    if (!saved || saved.v !== 1) return;
+    const p = saved.positions;
+    const okPositions = Array.isArray(p) && p.length === 4 && p.every((b, i) => b && Number.isFinite(b.x) && Number.isFinite(b.y) && b.x >= R - .001 && b.x <= W - R + .001 && b.y >= R - .001 && b.y <= H - R + .001 && p.every((o, j) => j <= i || Math.hypot(o.x - b.x, o.y - b.y) >= D - .001));
+    if (okPositions) engine.setPositions(p);
+    if (cueable(saved.cue)) selected = cue = saved.cue;
+    if (Number.isFinite(saved.angle)) angleDeg = wrap(saved.angle);
+    if (Number.isFinite(saved.power)) powerPct = clamp(Math.round(saved.power), 1, 100);
+    for (const [k, spec] of Object.entries(PHYS)) if (saved.cfg && Number.isFinite(saved.cfg[k])) cfg[k] = +clamp(saved.cfg[k], spec.min, spec.max).toFixed(spec.dp);
+    engine.config = { ...cfg };
+    for (const k of Object.keys(view)) if (saved.view && typeof saved.view[k] === 'boolean') view[k] = saved.view[k];
+    if ([1, 5, 10].includes(saved.stepMm)) stepMm = saved.stepMm;
+  }
+
+  /* ---------- page behaviour ---------- */
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { if (state === 'running') pause(); save(); } });
+  for (const type of ['gesturestart', 'gesturechange', 'contextmenu', 'dblclick']) document.addEventListener(type, e => e.preventDefault());
+  document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+  window.addEventListener('resize', layout); window.addEventListener('orientationchange', () => setTimeout(layout, 120));
+  if (window.ResizeObserver) new ResizeObserver(measure).observe(stage);
+  $('appVersion').textContent = '· ' + VERSION;
+  restore(); layout(); render();
+  setTimeout(() => $('toast').classList.add('off'), 4000);
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+  window.__carom = { get engine() { return engine; }, get state() { return state; }, get angle() { return angleDeg; }, get armed() { return armed; }, get prediction() { return predict(); }, get lastShot() { return lastShot; }, get scale() { return scale; } };
+})();
+</script>
+</body></html>
