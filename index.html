@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Jun's Carom">
 <meta name="theme-color" content="#101916">
 <meta name="format-detection" content="telephone=no">
-<meta name="app-build" content="6d6bc06f">
+<meta name="app-build" content="c3f5d0bd">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -180,6 +180,19 @@ padding:var(--st) var(--sr) var(--sb) var(--sl);background:var(--bg)}
 .steps em{font-style:normal;color:var(--lime)}
 .guidebox .ok{align-self:flex-end;height:40px;padding:0 22px;background:var(--lime);border-color:var(--lime);color:#1a3019;font-weight:700}
 #levelBadge{flex:none}
+.bar .tipbtn{display:flex;align-items:center;gap:6px;padding:0 9px 0 6px;font-size:11px;white-space:nowrap;border-color:#57704b}
+.tipbtn svg{width:24px;height:24px;flex:none}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border:1px solid var(--line);background:#15231b;border-radius:11px;margin-bottom:12px}
+.seg2 button{height:36px;border:0;background:transparent;font-size:12px}
+.seg2 button[aria-pressed=true]{background:#3b5035;color:var(--lime)}
+.tipbox{grid-template-columns:auto minmax(170px,230px);gap:16px}
+#tipBall{width:210px;height:210px;display:block;touch-action:none}
+.tipside{display:grid;gap:10px}
+#tipText{font-size:17px;font-weight:600;color:var(--lime);font-variant-numeric:tabular-nums}
+.tipside .hint{margin:0}
+.tipside .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tipside .row button{height:42px;font-size:13px}
+.tipside .ok{background:var(--lime);color:#1a3019;border-color:var(--lime);font-weight:700}
 </style>
 </head>
 <body>
@@ -201,6 +214,7 @@ padding:var(--st) var(--sr) var(--sb) var(--sl);background:var(--bg)}
       <button data-da="-1" aria-label="1도 감소">−1</button><button data-da="-0.1" aria-label="0.1도 감소">−0.1</button>
       <button id="angleBtn" class="readout" aria-label="샷 방향 각도 입력">20.00°</button>
       <button data-da="0.1" aria-label="0.1도 증가">+0.1</button><button data-da="1" aria-label="1도 증가">+1</button>
+      <button id="tipBtn" class="tipbtn" hidden aria-label="당점 선택"><svg viewBox="-12 -12 24 24"><circle r="11" fill="#f4f4e7"/><circle id="tipMini" r="2.6" fill="#2f6fb0"/></svg><span id="tipLabel">당점 중심</span></button>
     </div>
     <div id="placeBar" class="bar" hidden aria-label="공 좌표와 이동">
       <button id="coordBtn" class="readout wide" aria-label="공 중심 좌표 입력">X 612.0 · Y 612.0 mm</button>
@@ -277,15 +291,17 @@ padding:var(--st) var(--sr) var(--sb) var(--sl);background:var(--bg)}
         <div class="hint">배치 모드: 공을 끌거나, 공을 선택한 뒤 빈 곳을 누르세요. 좌표 버튼으로 mm 단위 직접 입력이 가능합니다.</div>
       </section>
       <section data-pane="phys" hidden>
-        <div class="phys" id="physRows"></div>
-        <div class="hint">동일 질량의 원형 강체 · 충격량 기반 충돌 · 연속 충돌 검출 · 240Hz 고정 계산<br>기본값은 연습용 가정값이며 실측값이 아닙니다. 반발계수 1은 탄성 충돌입니다. 감속 계수가 높을수록 빨리 멈춥니다. 쿠션의 접선 방향 속도는 유지합니다.</div>
+        <div class="seg2" id="engineSeg"><button data-kind="classic">클래식 (무회전)</button><button data-kind="spin">회전 물리 (베타)</button></div>
+        <div class="phys" id="physRows-classic"></div><div class="phys" id="physRows-spin"></div>
+        <div class="hint" id="hintClassic">클래식: 동일 질량의 원형 강체 · 충격량 기반 충돌 · 연속 충돌 검출 · 240Hz 고정 계산. 회전은 계산하지 않으며 쿠션의 접선 방향 속도는 유지합니다. 기본값은 연습용 가정값입니다.</div>
+        <div class="hint" id="hintSpin">회전 물리(베타): 당점에 따른 밀림·끌림(천과의 미끄럼 마찰)과 좌우 회전의 쿠션 반응을 계산합니다. 기본값은 문헌 범위 값을 기준 샷 몇 가지(최대 세기 약 1.4~1.9바퀴, 1팁당 약 0.7칸)에 맞춘 추정값이며 실제 당구대 실측값이 아닙니다. ‘쿠션 회전 반응’을 올리면 회전이 쿠션에서 더 많이 먹습니다. 미션은 클래식으로 진행됩니다.</div>
         <button id="physicsReset" class="wide-btn" style="margin-top:10px">물리 설정 기본값</button>
       </section>
       <section data-pane="info" hidden>
         <div class="stats"><div class="stat"><span>경기면 · 쿠션 안쪽</span><strong>2,448 × 1,224 mm</strong></div><div class="stat"><span>모든 공의 지름</span><strong>65.5 mm · 4구용</strong></div><div class="stat"><span>크기 비율</span><strong>1 : 37.37</strong></div></div>
         <div class="info">
           <p id="scaleInfo">비율 계산 중</p>
-          <p>물리 모델: 무회전 2차원 강체 근사이며, 회전·밀어치기·끌어치기·쿠션의 스핀 전달은 반영하지 않습니다. 실제 테이블에 맞춰 보정하지 않았으므로 연습용으로 사용하세요. 경기면·공·큐는 같은 축척이며 테두리 디자인은 예시입니다.</p>
+          <p>물리 모델: 클래식은 무회전 2차원 강체 근사입니다. 회전 물리(베타)는 당점에 따른 밀림·끌림과 쿠션에서의 회전 반응을 더한 모델이며, 큐를 세워 치는 휘어치기·스쿼트·공끼리의 마찰은 반영하지 않습니다. 실제 테이블에 맞춰 보정하지 않았으므로 연습용으로 사용하세요. 경기면·공·큐는 같은 축척이며 테두리 디자인은 예시입니다.</p>
           <p>모델 참고: <a href="https://mechanicsmap.psu.edu/websites/11_impulse_momentum_particle/11-3_surface_collisions/surface_collisions.html" target="_blank" rel="noopener noreferrer">Penn State · 쿠션 반발계수</a> · <a href="https://openstax.org/books/college-physics-2e/pages/8-6-collisions-of-point-masses-in-two-dimensions" target="_blank" rel="noopener noreferrer">OpenStax · 2차원 충돌</a> · 규격 참고: <a href="https://kr.object.ncloudstorage.com/kbfdiv/2025_kbf_division_manual.pdf.pdf" target="_blank" rel="noopener noreferrer">대한당구연맹 2025 디비전리그 매뉴얼</a></p>
           <p>아이폰 설치: Safari에서 열고 공유 버튼 → ‘홈 화면에 추가’. 화면 회전 잠금이 켜져 있어도 가로 화면으로 표시됩니다.</p>
           <p id="updateRow"><span id="appVersion"></span> <button id="checkUpdate" class="wide-btn" style="margin-left:8px">업데이트 확인</button></p>
@@ -311,6 +327,22 @@ padding:var(--st) var(--sr) var(--sb) var(--sl);background:var(--bg)}
       <div><b>3</b><strong>드래그하고 손 떼기</strong><p>테이블을 드래그해 큐대를 미세하게 조정한 뒤 <em>손을 떼면 샷</em>이 됩니다. 조정 없이 치려면 [발사], 그만두려면 [✕ 취소]를 누르세요.</p></div>
     </div>
     <button id="guideClose" class="ok">시작하기</button>
+  </div>
+</div>
+
+<div id="tipPad" class="overlay" hidden>
+  <div class="padbox tipbox" role="dialog" aria-label="당점 선택">
+    <svg id="tipBall" viewBox="-112 -112 224 224" aria-label="수구를 뒤에서 본 모습">
+      <circle r="100" fill="#f4f4e7" stroke="#8d927e" stroke-width="2"/>
+      <g id="tipRings" fill="none" stroke="#9aa08a" stroke-width="1" stroke-dasharray="3 3"></g>
+      <path d="M-100 0H100M0 -100V100" stroke="#b9bea8" stroke-width="1"/>
+      <circle id="tipDot" r="11" fill="#2f6fb0" stroke="#fff" stroke-width="2"/>
+    </svg>
+    <div class="tipside">
+      <div id="tipText">중심 (무회전)</div>
+      <div class="hint">공을 눌러 큐 팁이 닿는 자리를 정합니다. 점선 원은 1 · 2 · 3팁이고 반 팁 단위로 맞춰집니다.<br>위는 밀어치기, 아래는 끌어치기, 좌우는 쿠션에서 꺾이는 방향입니다.</div>
+      <div class="row"><button id="tipCenter">중심으로</button><button id="tipOk" class="ok">확인</button></div>
+    </div>
   </div>
 </div>
 
@@ -491,6 +523,214 @@ class CaromPhysics {
 globalThis.CaromPhysics = CaromPhysics;
 
 </script>
+<script id="spin-engine">/* Spin physics (beta). Units: mm, seconds, radians.
+   Axes are right-handed: x right, y down (as on screen), z into the table.
+   Each ball carries, besides position and velocity:
+     sx, sy  velocity of the ball's surface at the cloth contact point relative to the centre
+             (rolling without slipping means s = -v; follow/draw are |s| larger/smaller or reversed)
+     wz      spin about the vertical axis in rad/s (positive = clockwise seen from above)
+   Between collisions the ball slides (friction opposes the contact-point slip u = v + s) until u = 0,
+   then rolls. Ball-ball contact is frictionless, so spins survive it; cushions act with friction at a
+   contact point above the ball's centre. Defaults are literature-range values tuned to a few reference
+   shots, not measurements of a real table. */
+class CaromSpinPhysics {
+  constructor(positions, config = {}) {
+    this.width = 2448; this.height = 1224; this.radius = 32.75; this.g = 9810;
+    this.config = { ...CaromSpinPhysics.DEFAULTS, ...config };
+    this.setPositions(positions);
+  }
+  setPositions(positions) {
+    this.balls = positions.map(b => ({ x: b.x, y: b.y, vx: 0, vy: 0, sx: 0, sy: 0, wz: 0 }));
+    this.time = 0; this.ballHits = 0; this.cushionHits = 0;
+    this.distance = this.balls.map(() => 0); this.events = []; this.lastRebound = null;
+    this.trails = this.balls.map(b => [{ x: b.x, y: b.y }]);
+  }
+  /* tip.a / tip.b: cue-tip offset from the ball's centre as a fraction of the radius (right / up positive). */
+  launch(index, degrees, speed, tip = { a: 0, b: 0 }) {
+    const a = degrees * Math.PI / 180, dx = Math.cos(a), dy = -Math.sin(a), b = this.balls[index];
+    b.vx = dx * speed; b.vy = dy * speed;
+    b.sx = -2.5 * tip.b * speed * dx; b.sy = -2.5 * tip.b * speed * dy;
+    b.wz = -2.5 * tip.a * speed / this.radius;
+  }
+  moving() { return this.balls.some(b => b.vx !== 0 || b.vy !== 0 || b.sx !== 0 || b.sy !== 0); }
+  energy() {
+    const R = this.radius;
+    return this.balls.reduce((t, b) => t + .5 * (b.vx * b.vx + b.vy * b.vy) + .2 * (b.sx * b.sx + b.sy * b.sy + R * R * b.wz * b.wz), 0);
+  }
+  record(force = false) {
+    this.balls.forEach((b, i) => {
+      const path = this.trails[i], p = path[path.length - 1];
+      if (Math.hypot(p.x - b.x, p.y - b.y) <= (force ? .00001 : 4)) return;
+      const point = { x: b.x, y: b.y };
+      if (path.length >= 2) {
+        const prev = path[path.length - 2], ax = p.x - prev.x, ay = p.y - prev.y;
+        const bx = b.x - p.x, by = b.y - p.y;
+        if (Math.abs(ax * by - ay * bx) <= 1e-8 * Math.hypot(ax, ay) * Math.hypot(bx, by) && ax * bx + ay * by >= 0) {
+          path[path.length - 1] = point;
+          return;
+        }
+      }
+      path.push(point);
+    });
+  }
+  advance(dt) {
+    if (dt <= 0) return;
+    this.balls.forEach((b, i) => {
+      b.x += b.vx * dt; b.y += b.vy * dt;
+      this.distance[i] += Math.hypot(b.vx, b.vy) * dt;
+    });
+    this.record();
+  }
+  /* Cloth friction over dt: sliding first (constant direction, so the path is a parabola), then rolling. */
+  friction(dt) {
+    const c = this.config, slide = c.slideFriction * this.g, roll = c.rollFriction * this.g;
+    for (const b of this.balls) {
+      if (b.wz !== 0) { const d = c.spinDecay * dt; b.wz = Math.abs(b.wz) <= d ? 0 : b.wz - Math.sign(b.wz) * d; }
+      let t = dt;
+      const ux = b.vx + b.sx, uy = b.vy + b.sy, u = Math.hypot(ux, uy);
+      if (u > .5) {
+        const use = Math.min(t, u / (3.5 * slide)), ex = ux / u, ey = uy / u;
+        b.vx -= slide * use * ex; b.vy -= slide * use * ey;
+        b.sx -= 2.5 * slide * use * ex; b.sy -= 2.5 * slide * use * ey;
+        t -= use;
+        if (t <= 0) continue;
+      }
+      b.sx = -b.vx; b.sy = -b.vy;
+      const speed = Math.hypot(b.vx, b.vy);
+      if (speed === 0) continue;
+      const ratio = Math.max(0, speed - roll * t) / speed;
+      b.vx *= ratio; b.vy *= ratio; b.sx = -b.vx; b.sy = -b.vy;
+    }
+  }
+  pairTime(a, b, limit) {
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const vx = b.vx - a.vx, vy = b.vy - a.vy;
+    const approach = dx * vx + dy * vy;
+    if (approach >= -1e-7 * Math.hypot(dx, dy)) return null;
+    const c = dx * dx + dy * dy - (2 * this.radius) ** 2;
+    if (c <= 1e-6) return 0;
+    const v2 = vx * vx + vy * vy;
+    const discriminant = approach * approach - v2 * c;
+    if (discriminant < 0 || v2 < 1e-14) return null;
+    const t = c / (-approach + Math.sqrt(discriminant));
+    return t >= -1e-9 && t <= limit + 1e-9 ? Math.max(0, t) : null;
+  }
+  nextEvents(limit) {
+    let first = limit + 1; let events = [];
+    const add = (t, e) => {
+      if (t === null || t < -1e-9 || t > limit + 1e-9) return;
+      t = Math.max(0, Math.min(limit, t));
+      if (t < first - 1e-9) { first = t; events = [e]; }
+      else if (Math.abs(t - first) <= 1e-9) events.push(e);
+    };
+    this.balls.forEach((b, i) => {
+      const r = this.radius;
+      if (b.vx < -1e-7) add((r - b.x) / b.vx, { type: 'wall', i, axis: 'x', side: -1 });
+      if (b.vx > 1e-7) add((this.width - r - b.x) / b.vx, { type: 'wall', i, axis: 'x', side: 1 });
+      if (b.vy < -1e-7) add((r - b.y) / b.vy, { type: 'wall', i, axis: 'y', side: -1 });
+      if (b.vy > 1e-7) add((this.height - r - b.y) / b.vy, { type: 'wall', i, axis: 'y', side: 1 });
+      for (let j = i + 1; j < this.balls.length; j++) add(this.pairTime(b, this.balls[j], limit), { type: 'ball', i, j });
+    });
+    return events.length ? { time: first, events } : null;
+  }
+  /* Equal masses, no friction between balls: only the velocity along the line of centres is exchanged. */
+  resolvePair(i, j) {
+    const a = this.balls[i], b = this.balls[j];
+    const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy);
+    const nx = dist > 1e-10 ? dx / dist : 1, ny = dist > 1e-10 ? dy / dist : 0;
+    const normalSpeed = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+    if (normalSpeed >= -1e-7) return false;
+    const impulse = -(1 + this.config.ballRestitution) * normalSpeed / 2;
+    a.vx -= impulse * nx; a.vy -= impulse * ny;
+    b.vx += impulse * nx; b.vy += impulse * ny;
+    this.ballHits++;
+    this.events.push({ type: 'ball', i, j, time: this.time });
+    return true;
+  }
+  /* Cushion: impulse at the contact point (above the centre) with restitution along the contact normal
+     and Coulomb friction in the tangent plane (sticking when friction is large enough). */
+  resolveWall(e) {
+    const b = this.balls[e.i], c = this.config, R = this.radius;
+    const nx = e.axis === 'x' ? e.side : 0, ny = e.axis === 'y' ? e.side : 0;
+    const vn = b.vx * nx + b.vy * ny;
+    if (vn <= 1e-7) return false;
+    const vt0 = Math.abs(-b.vx * ny + b.vy * nx);
+    b[e.axis] = e.side < 0 ? R : (e.axis === 'x' ? this.width : this.height) - R;
+    const sin = c.cushionHeight, cos = Math.sqrt(1 - sin * sin);
+    const rx = R * cos * nx, ry = R * cos * ny, rz = -R * sin;
+    let wx = -b.sy / R, wy = b.sx / R, wz = b.wz;
+    const cx = b.vx + (wy * rz - wz * ry), cy = b.vy + (wz * rx - wx * rz), cz = wx * ry - wy * rx;
+    const Nx = -cos * nx, Ny = -cos * ny, Nz = sin;
+    const cN = cx * Nx + cy * Ny + cz * Nz;
+    const pn = -(1 + c.cushionRestitution) * cN;
+    const tx = cx - cN * Nx, ty = cy - cN * Ny, tz = cz - cN * Nz, slip = Math.hypot(tx, ty, tz);
+    let k = c.cushionGrip;                       // 2/7 would be a perfectly gripping, rigid cushion
+    if (slip > 1e-9 && k * slip > c.cushionFriction * pn) k = c.cushionFriction * pn / slip;
+    const px = -k * tx, py = -k * ty, pz = -k * tz;
+    b.vx += pn * Nx + px; b.vy += pn * Ny + py;
+    const q = 2.5 / (R * R);
+    wx += q * (ry * pz - rz * py); wy += q * (rz * px - rx * pz); wz += q * (rx * py - ry * px);
+    b.sx = R * wy; b.sy = -R * wx; b.wz = wz;
+    // The ball must leave the cushion.
+    const out = b.vx * nx + b.vy * ny;
+    if (out > -.02 * vn) { b.vx += (-.02 * vn - out) * nx; b.vy += (-.02 * vn - out) * ny; }
+    const vnOut = Math.abs(b.vx * nx + b.vy * ny), vtOut = Math.abs(-b.vx * ny + b.vy * nx);
+    this.lastRebound = { incoming: Math.atan2(vt0, vn) * 180 / Math.PI, outgoing: Math.atan2(vtOut, vnOut) * 180 / Math.PI, i: e.i };
+    this.cushionHits++;
+    this.events.push({ ...e, time: this.time });
+    return true;
+  }
+  correctPositions() {
+    const r = this.radius, diameter = 2 * r;
+    for (let k = 0; k < 24; k++) {
+      let error = 0;
+      for (let i = 0; i < this.balls.length; i++) {
+        const a = this.balls[i];
+        a.x = Math.max(r, Math.min(this.width - r, a.x));
+        a.y = Math.max(r, Math.min(this.height - r, a.y));
+        for (let j = i + 1; j < this.balls.length; j++) {
+          const b = this.balls[j], dx = b.x - a.x, dy = b.y - a.y;
+          const dist = Math.hypot(dx, dy), overlap = diameter - dist;
+          if (overlap <= 1e-8) continue;
+          error = Math.max(error, overlap);
+          const nx = dist > 1e-10 ? dx / dist : 1, ny = dist > 1e-10 ? dy / dist : 0;
+          a.x -= nx * overlap / 2; a.y -= ny * overlap / 2;
+          b.x += nx * overlap / 2; b.y += ny * overlap / 2;
+        }
+      }
+      if (error < 1e-7) break;
+    }
+    for (const b of this.balls) {
+      b.x = Math.max(r, Math.min(this.width - r, b.x));
+      b.y = Math.max(r, Math.min(this.height - r, b.y));
+    }
+  }
+  step(dt = 1 / 240) {
+    this.friction(dt / 2);
+    let remaining = dt, iterations = 0;
+    while (remaining > 1e-10) {
+      if (++iterations > 256) throw new Error('동시 충돌 계산 한도를 초과했습니다. 배치를 조금 바꿔 다시 시도하세요.');
+      const next = this.nextEvents(remaining);
+      if (!next) { this.advance(remaining); this.time += remaining; remaining = 0; break; }
+      this.advance(next.time); this.time += next.time; remaining -= next.time;
+      this.record(true);
+      for (const e of next.events) {
+        if (e.type === 'ball') this.resolvePair(e.i, e.j);
+        else this.resolveWall(e);
+      }
+      this.correctPositions();
+    }
+    this.friction(dt / 2);
+    // A ball rests once it neither travels nor slips; leftover vertical-axis spin is dropped with it.
+    for (const b of this.balls) if (Math.hypot(b.vx, b.vy) < 1 && Math.hypot(b.vx + b.sx, b.vy + b.sy) < 2) { b.vx = 0; b.vy = 0; b.sx = 0; b.sy = 0; }
+    if (!this.moving()) { for (const b of this.balls) b.wz = 0; this.record(true); }
+  }
+}
+CaromSpinPhysics.DEFAULTS = { ballRestitution: .95, cushionRestitution: .95, cushionFriction: .14, cushionGrip: .1, slideFriction: .2, rollFriction: .007, spinDecay: 4, cushionHeight: .1 };
+CaromSpinPhysics.TIP = 6 / 32.75;      // one "tip" = about 6 mm of cue-tip offset (half a 12 mm tip)
+CaromSpinPhysics.MAX_SPEED = 6800;     // launch speed at 100 % power, mm/s
+globalThis.CaromSpinPhysics = CaromSpinPhysics;
+</script>
 <script id="mission-core">/* Mission rules, shared by the generator (Node) and the app.
    Balls: 0 white (cue), 1 red ①, 2 red ②, 3 yellow (opponent's cue ball).
    Rails: top/bottom are the long rails (장), left/right the short rails (단). */
@@ -626,7 +866,7 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
 <script id="app-script">
 (() => {
   'use strict';
-  const VERSION = 'mobile 2.0', BUILD = document.querySelector('meta[name="app-build"]').content, UPDATES = ('serviceWorker' in navigator);
+  const VERSION = 'mobile 2.1', BUILD = document.querySelector('meta[name="app-build"]').content, UPDATES = ('serviceWorker' in navigator);
   const W = 2448, H = 1224, D = 65.5, R = D / 2, NS = 'http://www.w3.org/2000/svg', DT = 1 / 240;
   const KEY = 'jun-carom-mobile-v1', SLOP = 7, FINE = 0.2, CUE_LEN = 1400;
   const $ = id => document.getElementById(id);
@@ -637,15 +877,33 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
     { name: '적구 ②', mark: '2', fill: 'red', color: '#ef4940', x: 1224, y: 360 },
     { name: '노란공', mark: '', fill: 'yellow', color: '#f4c628', x: 1224, y: 864 }
   ];
-  const DEFAULTS = { ballRestitution: .96, cushionRestitution: .84, friction: .012 };
+  const TIP = CaromSpinPhysics.TIP, MAX_TIPS = 3;
+  const DEFAULTS = {
+    classic: { ballRestitution: .96, cushionRestitution: .84, friction: .012 },
+    spin: (({ ballRestitution, cushionRestitution, cushionGrip, slideFriction, rollFriction }) => ({ ballRestitution, cushionRestitution, cushionGrip, slideFriction, rollFriction }))(CaromSpinPhysics.DEFAULTS)
+  };
   const PHYS = {
-    ballRestitution: { min: .85, max: 1, step: .01, dp: 2, label: '공 반발계수' },
-    cushionRestitution: { min: .5, max: 1, step: .01, dp: 2, label: '쿠션 반발계수' },
-    friction: { min: .003, max: .04, step: .001, dp: 3, label: '천 감속 계수 μ' }
+    classic: {
+      ballRestitution: { min: .5, max: 1, step: .01, dp: 2, label: '공 반발계수' },
+      cushionRestitution: { min: .3, max: 1, step: .01, dp: 2, label: '쿠션 반발계수' },
+      friction: { min: .002, max: .06, step: .001, dp: 3, label: '천 감속 계수 μ' }
+    },
+    spin: {
+      ballRestitution: { min: .5, max: 1, step: .01, dp: 2, label: '공 반발계수' },
+      cushionRestitution: { min: .5, max: 1, step: .01, dp: 2, label: '쿠션 반발계수' },
+      cushionGrip: { min: 0, max: .28, step: .01, dp: 2, label: '쿠션 회전 반응' },
+      slideFriction: { min: .05, max: .4, step: .01, dp: 2, label: '천 미끄럼 마찰' },
+      rollFriction: { min: .002, max: .03, step: .001, dp: 3, label: '천 구름 저항' }
+    }
   };
   const VIEWBOX = { tight: [-150, -150, 2748, 1524], dim: [-220, -225, 2888, 1654] };
 
-  let cfg = { ...DEFAULTS };
+  // Two engines: 'classic' (the web version's no-spin engine, untouched) and 'spin' (beta).
+  let kind = 'classic', tipA = 0, tipB = 0;
+  const store = { classic: { ...DEFAULTS.classic }, spin: { ...DEFAULTS.spin } };
+  let cfg = store.classic;
+  const make = (positions, config, which = kind) => which === 'spin' ? new CaromSpinPhysics(positions, config) : new CaromPhysics(positions, config);
+  const tipOf = () => kind === 'spin' ? { a: tipA * TIP, b: tipB * TIP } : { a: 0, b: 0 };
   let view = { trail: true, grid: false, dim: false, label: true, loupe: true };
   let engine = new CaromPhysics(meta, cfg);
   let mode = 'shot', state = 'ready', selected = 0, cue = 0, angleDeg = 20, powerPct = 45, stepMm = 5;
@@ -663,7 +921,8 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
   const nodes = [], picks = [], paths = [], labels = [];
   const busy = () => state === 'running' || state === 'paused';
   const snapshot = () => engine.balls.map(b => ({ x: b.x, y: b.y }));
-  const speedOf = p => 150 + 35 * p;
+  const speedOf = (p, which = kind) => which === 'spin' ? 150 + (CaromSpinPhysics.MAX_SPEED - 150) * p / 100 : 150 + 35 * p;
+  const tipWords = (a, b) => !a && !b ? '중심' : [b ? (b > 0 ? '상 ' : '하 ') + Math.abs(b) + '팁' : '', a ? (a > 0 ? '우 ' : '좌 ') + Math.abs(a) + '팁' : ''].filter(Boolean).join(' · ');
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const wrap = a => { a = ((a % 360) + 360) % 360; a = Math.round(a * 100) / 100; return a >= 360 ? 0 : a; };
   const cueable = i => i === 0 || i === 3;
@@ -742,9 +1001,9 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
 
   /* ---------- prediction: the real engine, run ahead to the cue ball's 2nd collision ---------- */
   function predict() {
-    const key = JSON.stringify([engine.balls.map(b => [b.x, b.y]), cue, angleDeg, powerPct, cfg]);
+    const key = JSON.stringify([engine.balls.map(b => [b.x, b.y]), cue, angleDeg, powerPct, cfg, kind, tipA, tipB]);
     if (key === predictionKey) return prediction;
-    const sim = new CaromPhysics(snapshot(), { ...cfg }), c = cue, hits = [];
+    const sim = make(snapshot(), { ...cfg }), c = cue, hits = [];
     const pair = sim.resolvePair, wall = sim.resolveWall;
     sim.resolvePair = function (i, j) {
       const ok = pair.call(this, i, j);
@@ -756,11 +1015,16 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
       if (ok && e.i === c && hits.length < 2) hits.push({ kind: 'wall', x: this.balls[c].x, y: this.balls[c].y });
       return ok;
     };
-    sim.launch(c, angleDeg, speedOf(powerPct));
+    sim.launch(c, angleDeg, speedOf(powerPct), tipOf());
     let guard = 0;
     try { while (sim.moving() && hits.length < 2 && guard++ < 9600) sim.step(DT); } catch (error) { /* shown when the shot is run */ }
     const points = [{ kind: 'start', x: engine.balls[c].x, y: engine.balls[c].y }, ...hits];
     if (hits.length < 2) points.push({ kind: 'stop', x: sim.balls[c].x, y: sim.balls[c].y });
+    // The drawn path follows the simulated trail, so follow/draw curves show as they will be played.
+    const trail = sim.trails[c], at = (p, from) => trail.findIndex((q, i) => i >= from && Math.hypot(p.x - q.x, p.y - q.y) < 1e-4);
+    const i1 = hits[0] ? at(hits[0], 1) : trail.length - 1, i2 = hits[0] && i1 > 0 ? (hits[1] ? at(hits[1], i1 + 1) : trail.length - 1) : -1;
+    points.path1 = i1 > 0 ? trail.slice(0, i1 + 1) : [points[0], points[1]];
+    points.path2 = !points[2] ? null : i2 > i1 ? trail.slice(i1, i2 + 1) : [points[1], points[2]];
     predictionKey = key; prediction = points;
     return points;
   }
@@ -773,12 +1037,11 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
     $('aim').setAttribute('visibility', show ? 'visible' : 'hidden');
     if (!show) return null;
     const aid = mission ? COURSES.find(c => c.id === mission.course).aid : 2;
-    let pts = predict(); const b = engine.balls[cue];
-    if (aid < 2) pts = pts.slice(0, 2);
+    const full = predict(), pts = aid < 2 ? full.slice(0, 2) : full, b = engine.balls[cue];
     $('pv1').setAttribute('visibility', aid ? 'inherit' : 'hidden'); $('pv2').setAttribute('visibility', aid ? 'inherit' : 'hidden');
-    const seg = (a, c) => `M${a.x.toFixed(2)} ${a.y.toFixed(2)}L${c.x.toFixed(2)} ${c.y.toFixed(2)}`;
-    $('pv1').setAttribute('d', seg(pts[0], pts[1]));
-    $('pv2').setAttribute('d', pts[2] ? seg(pts[1], pts[2]) : '');
+    const line = path => path.map((q, j) => `${j ? 'L' : 'M'}${q.x.toFixed(1)} ${q.y.toFixed(1)}`).join('');
+    $('pv1').setAttribute('d', line(full.path1));
+    $('pv2').setAttribute('d', pts[2] && full.path2 ? line(full.path2) : '');
     [['ghost1', pts[1]], ['ghost2', pts[2]]].forEach(([id, p]) => {
       const g = $(id);
       g.setAttribute('visibility', p && aid ? 'inherit' : 'hidden');
@@ -855,12 +1118,20 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
     $('undo').disabled = locked || inMission || !history.length; $('reset').disabled = locked || inMission;
     for (const id of ['powerMinus', 'powerPlus']) $(id).disabled = locked;
     $('physicsReset').disabled = locked || inMission;
-    document.querySelectorAll('#physRows button').forEach(n => n.disabled = locked || inMission);
+    document.querySelectorAll('.phys button').forEach(n => n.disabled = locked || inMission);
     $('powerTrack').style.opacity = locked ? .4 : 1;
     $('powerTrack').setAttribute('aria-valuenow', powerPct);
     $('powerValue').textContent = powerPct + '%'; $('launchSpeed').textContent = (speedOf(powerPct) / 1000).toFixed(2) + ' m/s';
     $('powerFill').style.height = powerPct + '%'; $('powerThumb').style.bottom = powerPct + '%';
-    for (const k of Object.keys(PHYS)) $(k + 'Value').textContent = cfg[k].toFixed(PHYS[k].dp);
+    for (const which of ['classic', 'spin']) {
+      for (const k of Object.keys(PHYS[which])) $(`${which}-${k}Value`).textContent = store[which][k].toFixed(PHYS[which][k].dp);
+      $('physRows-' + which).hidden = which !== kind;
+    }
+    $('hintClassic').hidden = kind !== 'classic'; $('hintSpin').hidden = kind !== 'spin';
+    document.querySelectorAll('#engineSeg button').forEach(n => { n.setAttribute('aria-pressed', String(n.dataset.kind === kind)); n.disabled = locked || inMission; });
+    $('tipBtn').hidden = kind !== 'spin'; $('tipBtn').disabled = locked;
+    $('tipLabel').textContent = '당점 ' + tipWords(tipA, tipB);
+    $('tipMini').setAttribute('cx', (tipA * TIP * 11).toFixed(2)); $('tipMini').setAttribute('cy', (-tipB * TIP * 11).toFixed(2));
     document.querySelectorAll('#viewOpts button').forEach(n => n.setAttribute('aria-pressed', String(view[n.dataset.view])));
     document.querySelectorAll('#tabs button').forEach(n => n.setAttribute('aria-pressed', String(n.dataset.tab === tab)));
     document.querySelectorAll('#sheetBody section').forEach(n => n.hidden = n.dataset.pane !== tab);
@@ -968,17 +1239,30 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
     }
     render(); if (state === 'running') raf = requestAnimationFrame(frame);
   }
+  /* Bring back the engine, settings and tip the last shot was played with. */
+  function applyShotSettings() {
+    kind = lastShot.kind; store[kind] = { ...lastShot.config }; cfg = store[kind];
+    angleDeg = lastShot.angle; powerPct = lastShot.power; tipA = lastShot.tipA; tipB = lastShot.tipB;
+  }
+  function setKind(next) {
+    if (busy() || mission || next === kind || !store[next]) return;
+    kind = next; cfg = store[kind]; armed = false;
+    engine = make(snapshot(), { ...cfg }); state = 'ready';
+    toast(kind === 'spin' ? '회전 물리(베타) · 위쪽 ‘당점’ 버튼으로 당점을 정하세요.' : '클래식(무회전) 엔진으로 바꿨습니다.', 3600);
+    setReport(kind === 'spin' ? '회전 물리 (베타)' : '클래식 (무회전)', kind === 'spin' ? '당점에 따른 밀림·끌림과 쿠션 반응을 계산합니다. 값은 추정 보정값입니다.' : '웹판과 같은 무회전 물리입니다.');
+    render();
+  }
   function startShot(replaying = false) {
     if (busy() || (replaying && !lastShot)) return;
     armed = false;
     replayingNow = replaying;
-    if (!replaying) lastShot = { positions: snapshot(), cue, angle: angleDeg, power: powerPct, config: { ...cfg } };
-    else { angleDeg = lastShot.angle; powerPct = lastShot.power; cfg = { ...lastShot.config }; }
-    selected = cue = lastShot.cue; mode = 'shot'; engine.config = { ...lastShot.config }; engine.setPositions(lastShot.positions);
-    engine.launch(cue, lastShot.angle, speedOf(lastShot.power));
+    if (!replaying) lastShot = { positions: snapshot(), cue, angle: angleDeg, power: powerPct, config: { ...cfg }, kind, tipA, tipB };
+    else applyShotSettings();
+    selected = cue = lastShot.cue; mode = 'shot'; engine = make(lastShot.positions, { ...lastShot.config });
+    engine.launch(cue, lastShot.angle, speedOf(lastShot.power), tipOf());
     state = 'running'; previousTime = null; accumulator = 0; requestWake();
-    setReport(replaying ? '직전 샷 다시 보기' : '샷 진행 중', `${meta[cue].name} · 방향 ${lastShot.angle.toFixed(2)}° · 세기 ${lastShot.power}% · 무회전`);
-    toast(`${meta[cue].name} · ${lastShot.angle.toFixed(2)}° · ${lastShot.power}%`);
+    setReport(replaying ? '직전 샷 다시 보기' : '샷 진행 중', `${meta[cue].name} · 방향 ${lastShot.angle.toFixed(2)}° · 세기 ${lastShot.power}% · ${kind === 'spin' ? '당점 ' + tipWords(tipA, tipB) : '무회전'}`);
+    toast(`${meta[cue].name} · ${lastShot.angle.toFixed(2)}° · ${lastShot.power}%${kind === 'spin' ? ' · 당점 ' + tipWords(tipA, tipB) : ''}`);
     render(); raf = requestAnimationFrame(frame);
   }
   function pause() {
@@ -991,7 +1275,7 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
     if (!lastShot) return;
     cancelAnimationFrame(raf); releaseWake(); armed = false; verdict = null;
     const before = snapshot(); loadPositions(lastShot.positions); remember(before);
-    cue = selected = lastShot.cue; angleDeg = lastShot.angle; powerPct = lastShot.power; cfg = { ...lastShot.config }; engine.config = { ...cfg }; mode = 'shot';
+    cue = selected = lastShot.cue; applyShotSettings(); engine = make(lastShot.positions, { ...cfg }); state = 'ready'; mode = 'shot';
     toast('샷 전 배치로 복원했습니다. 방향과 세기를 바꿔 비교해보세요.');
     setReport('샷 전 배치 복원', '동일한 배치에서 다른 샷을 시도할 수 있습니다.');
     render();
@@ -1129,15 +1413,40 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
   $('sheet').addEventListener('pointerdown', e => { if (e.target === $('sheet')) $('sheet').hidden = true; });
   document.querySelectorAll('#tabs button').forEach(n => n.onclick = () => { if (n.dataset.tab === 'help') { $('sheet').hidden = true; $('guide').hidden = false; return; } tab = n.dataset.tab; $('sheetBody').scrollTop = 0; render(); });
   document.querySelectorAll('#viewOpts button').forEach(n => n.onclick = () => { const k = n.dataset.view; view[k] = !view[k]; if (k === 'dim') measure(); render(); });
-  for (const [k, spec] of Object.entries(PHYS)) {
+  for (const which of ['classic', 'spin']) for (const [k, spec] of Object.entries(PHYS[which])) {
     const label = document.createElement('label'); label.textContent = spec.label;
     const box = document.createElement('div'); box.className = 'stepper';
-    box.innerHTML = `<button type="button" aria-label="${spec.label} 감소">−</button><strong id="${k}Value"></strong><button type="button" aria-label="${spec.label} 증가">+</button>`;
-    $('physRows').append(label, box);
-    const change = dir => { if (busy()) return; cfg[k] = +clamp(cfg[k] + dir * spec.step, spec.min, spec.max).toFixed(spec.dp); engine.config = { ...cfg }; requestRender(); };
+    box.innerHTML = `<button type="button" aria-label="${spec.label} 감소">−</button><strong id="${which}-${k}Value"></strong><button type="button" aria-label="${spec.label} 증가">+</button>`;
+    $('physRows-' + which).append(label, box);
+    const change = dir => { if (busy() || mission || which !== kind) return; cfg[k] = +clamp(cfg[k] + dir * spec.step, spec.min, spec.max).toFixed(spec.dp); engine.config = { ...engine.config, ...cfg }; requestRender(); };
     holdable(box.firstChild, () => change(-1)); holdable(box.lastChild, () => change(1));
   }
-  $('physicsReset').onclick = () => { if (busy()) return; cfg = { ...DEFAULTS }; engine.config = { ...cfg }; render(); };
+  $('physicsReset').onclick = () => { if (busy() || mission) return; store[kind] = { ...DEFAULTS[kind] }; cfg = store[kind]; engine = make(snapshot(), { ...cfg }); state = 'ready'; render(); };
+  document.querySelectorAll('#engineSeg button').forEach(n => n.onclick = () => setKind(n.dataset.kind));
+  /* ---------- cue-tip position (spin engine) ---------- */
+  {
+    const ball = $('tipBall'), unit = TIP * 100;
+    for (let n = 1; n <= MAX_TIPS; n++) el('circle', { r: (unit * n).toFixed(1) }, $('tipRings'));
+    const show = () => {
+      $('tipDot').setAttribute('cx', (tipA * unit).toFixed(1)); $('tipDot').setAttribute('cy', (-tipB * unit).toFixed(1));
+      $('tipText').textContent = !tipA && !tipB ? '중심 (무회전)' : tipWords(tipA, tipB);
+    };
+    const pick = e => {
+      const l = local(e, ball); let a = ((l.x / l.w) * 224 - 112) / unit, b = -((l.y / l.h) * 224 - 112) / unit;
+      const r = Math.hypot(a, b); if (r > MAX_TIPS) { a *= MAX_TIPS / r; b *= MAX_TIPS / r; }
+      a = Math.round(a * 2) / 2; b = Math.round(b * 2) / 2;
+      while (Math.hypot(a, b) > MAX_TIPS + 1e-9) { if (Math.abs(a) >= Math.abs(b)) a -= Math.sign(a) * .5; else b -= Math.sign(b) * .5; }
+      tipA = a; tipB = b; show(); requestRender();
+    };
+    let id = null;
+    ball.addEventListener('pointerdown', e => { e.preventDefault(); id = e.pointerId; ball.setPointerCapture(id); pick(e); });
+    ball.addEventListener('pointermove', e => { if (id === e.pointerId) pick(e); });
+    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) ball.addEventListener(type, e => { if (id === e.pointerId) id = null; });
+    $('tipBtn').onclick = () => { if (busy()) return; armed = false; show(); $('tipPad').hidden = false; render(); };
+    $('tipCenter').onclick = () => { tipA = 0; tipB = 0; show(); requestRender(); };
+    $('tipOk').onclick = () => { $('tipPad').hidden = true; loupeUntil = performance.now() + 1500; render(); };
+    $('tipPad').addEventListener('pointerdown', e => { if (e.target === $('tipPad')) $('tipPad').hidden = true; });
+  }
   /* Drag-to-scroll that works in both orientations (native touch scrolling ignores the rotation). */
   function dragScroll(body) {
     let id = null, last = 0, moved = 0;
@@ -1183,9 +1492,10 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
   function openMissions() { if (busy()) return; armed = false; if (mission) course = mission.course; else course = COURSES[Math.min(levelOf().rank, COURSES.length - 1)].id; renderMissions(); $('missionBody').scrollTop = 0; $('missions').hidden = false; render(); }
   function startMission(m) {
     if (busy()) return;
-    if (!mission) keep = { positions: snapshot(), cfg: { ...cfg }, cue, angle: angleDeg, power: powerPct };
+    if (!mission) keep = { positions: snapshot(), cfg: { ...store.classic }, spin: { ...store.spin }, kind, tipA, tipB, cue, angle: angleDeg, power: powerPct };
     mission = m; tries = 0; usedAnswer = false; verdict = null; armed = false; history = []; lastShot = null;
-    cfg = { ...DEFAULTS }; engine.config = { ...cfg }; loadPositions(m.balls); mode = 'shot'; selected = cue = 0;
+    kind = 'classic'; store.classic = { ...DEFAULTS.classic }; cfg = store.classic; tipA = 0; tipB = 0;
+    engine = make(m.balls, { ...cfg }); state = 'ready'; mode = 'shot'; selected = cue = 0;
     // Start with the cue pointing at red ① (a neutral starting aim, not the answer).
     angleDeg = wrap(Math.atan2(m.balls[0].y - m.balls[1].y, m.balls[1].x - m.balls[0].x) * 180 / Math.PI); powerPct = 45;
     $('missions').hidden = true; setReport(`미션 · ${catName(m.cat)} ${m.no}`, MissionCore.describe(m)[1]);
@@ -1194,10 +1504,11 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
   function exitMission() {
     if (!mission || busy()) return;
     mission = null; verdict = null; armed = false; history = []; lastShot = null;
-    cfg = { ...keep.cfg }; engine.config = { ...cfg }; loadPositions(keep.positions); selected = cue = keep.cue; angleDeg = keep.angle; powerPct = keep.power; keep = null;
+    store.classic = { ...keep.cfg }; store.spin = { ...keep.spin }; kind = keep.kind; cfg = store[kind]; tipA = keep.tipA; tipB = keep.tipB;
+    engine = make(keep.positions, { ...cfg }); state = 'ready'; selected = cue = keep.cue; angleDeg = keep.angle; powerPct = keep.power; keep = null;
     $('missions').hidden = true; setReport('자유 연습', '미션을 마치고 이전 배치로 돌아왔습니다.'); toast('자유 연습으로 돌아왔습니다.'); render();
   }
-  function missionRetry() { verdict = null; armed = false; loadPositions(mission.balls); engine.config = { ...cfg }; }
+  function missionRetry() { verdict = null; armed = false; kind = 'classic'; cfg = store.classic; tipA = 0; tipB = 0; engine = make(mission.balls, { ...cfg }); state = 'ready'; }
   function missionFinish() {
     if (replayingNow) { showVerdict(); return; }
     tries++;
@@ -1290,7 +1601,7 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
 
   /* ---------- keyboard (desktop / external keyboard) ---------- */
   document.addEventListener('keydown', e => {
-    if (pad || !$('sheet').hidden || !$('missions').hidden || !$('guide').hidden || /BUTTON/.test(e.target.tagName) || gesture || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (pad || !$('sheet').hidden || !$('missions').hidden || !$('guide').hidden || !$('tipPad').hidden || /BUTTON/.test(e.target.tagName) || gesture || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.code === 'Space' && mode === 'shot') { e.preventDefault(); busy() ? pause() : startShot(); return; }
     if (busy()) return;
     if (mode === 'shot' && ['ArrowLeft', 'ArrowRight'].includes(e.key)) { e.preventDefault(); setAngle(angleDeg + (e.key === 'ArrowLeft' ? 1 : -1) * (e.shiftKey ? 5 : .2)); return; }
@@ -1302,8 +1613,8 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
   function queueSave() { clearTimeout(saveTimer); saveTimer = setTimeout(save, 400); }
   function save() {
     if (busy() || (mission && state !== 'ready')) return;
-    try { const free = mission ? keep : { positions: snapshot(), cue, angle: angleDeg, power: powerPct, cfg };
-      localStorage.setItem(KEY, JSON.stringify({ v: 1, positions: free.positions, cue: free.cue, angle: free.angle, power: free.power, cfg: free.cfg, view, stepMm })); } catch (error) { /* storage may be unavailable */ }
+    try { const free = mission ? keep : { positions: snapshot(), cue, angle: angleDeg, power: powerPct, cfg: store.classic, spin: store.spin, kind, tipA, tipB };
+      localStorage.setItem(KEY, JSON.stringify({ v: 1, positions: free.positions, cue: free.cue, angle: free.angle, power: free.power, cfg: free.cfg, spin: free.spin, kind: free.kind, tip: [free.tipA, free.tipB], view, stepMm })); } catch (error) { /* storage may be unavailable */ }
   }
   function restore() {
     let saved = null;
@@ -1315,8 +1626,10 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
     if (cueable(saved.cue)) selected = cue = saved.cue;
     if (Number.isFinite(saved.angle)) angleDeg = wrap(saved.angle);
     if (Number.isFinite(saved.power)) powerPct = clamp(Math.round(saved.power), 1, 100);
-    for (const [k, spec] of Object.entries(PHYS)) if (saved.cfg && Number.isFinite(saved.cfg[k])) cfg[k] = +clamp(saved.cfg[k], spec.min, spec.max).toFixed(spec.dp);
-    engine.config = { ...cfg };
+    for (const [which, from] of [['classic', saved.cfg], ['spin', saved.spin]]) for (const [k, spec] of Object.entries(PHYS[which])) if (from && Number.isFinite(from[k])) store[which][k] = +clamp(from[k], spec.min, spec.max).toFixed(spec.dp);
+    if (saved.kind === 'spin') kind = 'spin';
+    if (Array.isArray(saved.tip) && saved.tip.every(v => Number.isFinite(v) && Math.abs(v * 2 - Math.round(v * 2)) < 1e-9) && Math.hypot(saved.tip[0], saved.tip[1]) <= MAX_TIPS + 1e-9) [tipA, tipB] = saved.tip;
+    cfg = store[kind]; engine = make(snapshot(), { ...cfg });
     for (const k of Object.keys(view)) if (saved.view && typeof saved.view[k] === 'boolean') view[k] = saved.view[k];
     if ([1, 5, 10].includes(saved.stepMm)) stepMm = saved.stepMm;
   }
@@ -1356,7 +1669,7 @@ if (typeof module !== 'undefined') module.exports = MissionCore;
     get engine() { return engine; }, get state() { return state; }, get angle() { return angleDeg; }, get power() { return powerPct; }, get armed() { return armed; },
     get prediction() { return predict(); }, get lastShot() { return lastShot; }, get scale() { return scale; }, get mission() { return mission; }, get verdict() { return verdict; },
     get progress() { return prog; }, get level() { return levelOf(); }, missions: MISSIONS,
-    startMission: id => startMission(MISSIONS.find(m => m.id === id)), exitMission, setAim: (a, p) => { angleDeg = wrap(a); powerPct = p; render(); }, shoot: () => startShot(),
+    startMission: id => startMission(MISSIONS.find(m => m.id === id)), exitMission, setKind, get kind() { return kind; }, get tip() { return [tipA, tipB]; }, setTip: (a, b) => { tipA = a; tipB = b; render(); }, get cfg() { return cfg; }, setAim: (a, p) => { angleDeg = wrap(a); powerPct = p; render(); }, shoot: () => startShot(),
     finishNow() { if (state !== 'running') return; cancelAnimationFrame(raf); try { let n = 0; while (engine.moving() && n++ < 40000) engine.step(DT); } catch (error) { /* reported by finish */ } finish(); }
   };
 })();
